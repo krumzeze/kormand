@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CANDIDATE
+  EMPLOYER
+  ADMIN
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  REMOTE
+}
+
+enum ExperienceLevel {
+  INTERN
+  JUNIOR
+  MIDDLE
+  SENIOR
+  LEAD
+}
+
+enum Currency {
+  TJS
+  USD
+}
+
+enum ApplicationStatus {
+  SENT
+  VIEWED
+  INTERVIEW
+  REJECTED
+  ACCEPTED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(CANDIDATE)
+  name         String
+  phone        String?
+  avatarUrl    String?
+  locale       String   @default("ru")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  candidate    CandidateProfile?
+  company      Company?
+  applications Application[]
+
+  @@map("users")
+}
+
+model CandidateProfile {
+  id              String           @id @default(cuid())
+  userId          String           @unique
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headline        String?
+  about           String?
+  city            String?
+  skills          String[]
+  experienceLevel ExperienceLevel?
+  resumeUrl       String?
+  updatedAt       DateTime         @updatedAt
+
+  @@map("candidate_profiles")
+}
+
+model Company {
+  id          String  @id @default(cuid())
+  ownerId     String  @unique
+  owner       User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name        String
+  logoUrl     String?
+  description String?
+  website     String?
+  city        String?
+  industry    String?
+  ratingAvg   Float   @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  jobs Job[]
+
+  @@map("companies")
+}
+
+model Job {
+  id          String          @id @default(cuid())
+  companyId   String
+  company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  city        String
+  type        JobType
+  level       ExperienceLevel
+  salaryMin   Int?
+  salaryMax   Int?
+  currency    Currency        @default(TJS)
+  skills      String[]
+  category    String
+  isActive    Boolean         @default(true)
+  isFeatured  Boolean         @default(false)
+  views       Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  applications Application[]
+
+  @@index([city, category, type])
+  @@index([isActive, isFeatured])
+  @@map("jobs")
+}
+
+model Application {
+  id        String            @id @default(cuid())
+  jobId     String
+  job       Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    ApplicationStatus @default(SENT)
+  coverNote String?
+  matchScore Int?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@unique([jobId, userId])
+  @@map("applications")
+}

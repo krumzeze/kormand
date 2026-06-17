@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kormand_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kormand
+      POSTGRES_PASSWORD: kormand_pass
+      POSTGRES_DB: kormand_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      # Хост-порт 5500: 5432 на этой Windows-машине в зарезервированном
+      # диапазоне Hyper-V. В контейнере Postgres по-прежнему на 5432.
+      - '5500:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U kormand -d kormand_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kormand_app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://kormand:kormand_pass@postgres:5432/kormand_db
+      AUTH_SECRET: ${AUTH_SECRET:-change-me-in-production}
+      AUTH_URL: ${AUTH_URL:-http://localhost:3000}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+    ports:
+      - '3000:3000'
+    volumes:
+      - uploads:/app/public/uploads
+
+volumes:
+  postgres_data:
+  uploads:
