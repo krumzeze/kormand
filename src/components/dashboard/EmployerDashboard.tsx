@@ -7,11 +7,12 @@ import { Link } from '@/i18n/navigation'
 import {
   Briefcase, BarChart3, Building2, Eye, Users, Plus,
   ChevronDown, ChevronRight, CheckCircle2, XCircle, Clock,
-  MessageSquare, Send, Edit3, Zap
+  MessageSquare, Send, Edit3, Zap, Trash2
 } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import { cn, timeAgo } from '@/lib/utils'
 import { toast } from '@/components/ui/Toaster'
+import EditJobModal from '@/components/dashboard/EditJobModal'
 
 const STATUS_CONFIG = {
   SENT: { label: 'Отправлен', variant: 'muted' as const },
@@ -33,6 +34,8 @@ export default function EmployerDashboard({ company, totalViews, totalApplicatio
   const [activeTab, setActiveTab] = useState<'jobs' | 'applications' | 'stats'>('jobs')
   const [expandedJob, setExpandedJob] = useState<string | null>(null)
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
+  const [editingJob, setEditingJob] = useState<any | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const updateApplicationStatus = async (appId: string, status: string) => {
     setUpdatingStatus(appId)
@@ -49,6 +52,22 @@ export default function EmployerDashboard({ company, totalViews, totalApplicatio
       }
     } finally {
       setUpdatingStatus(null)
+    }
+  }
+
+  const deleteJob = async (job: any) => {
+    if (!confirm(`Удалить вакансию «${job.title}»? Это действие необратимо.`)) return
+    setDeletingId(job.id)
+    try {
+      const res = await fetch(`/api/jobs/${job.id}`, { method: 'DELETE' })
+      if (res.ok) {
+        toast('Вакансия удалена', 'success')
+        window.location.reload()
+      } else {
+        toast('Не удалось удалить вакансию', 'error')
+      }
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -201,6 +220,21 @@ export default function EmployerDashboard({ company, totalViews, totalApplicatio
                             className="rounded-xl px-3 py-1.5 text-xs text-sky-blue hover:bg-sky-light transition-all">
                             Открыть
                           </Link>
+                          <button
+                            onClick={e => { e.stopPropagation(); setEditingJob(job) }}
+                            className="rounded-xl px-3 py-1.5 text-xs text-muted hover:text-ink hover:bg-black/5 transition-all inline-flex items-center gap-1"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            Изменить
+                          </button>
+                          <button
+                            onClick={e => { e.stopPropagation(); deleteJob(job) }}
+                            disabled={deletingId === job.id}
+                            className="rounded-xl px-3 py-1.5 text-xs text-red-500 hover:bg-red-50 transition-all inline-flex items-center gap-1 disabled:opacity-50"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Удалить
+                          </button>
                         </div>
                         <ChevronDown className={cn('w-4 h-4 text-muted transition-transform duration-300', expandedJob === job.id && 'rotate-180')} />
                       </div>
@@ -372,6 +406,14 @@ export default function EmployerDashboard({ company, totalViews, totalApplicatio
             <span className="text-xs text-lavender font-medium ml-auto flex-shrink-0">Скоро</span>
           </div>
         </motion.div>
+      )}
+
+      {editingJob && (
+        <EditJobModal
+          job={editingJob}
+          onClose={() => setEditingJob(null)}
+          onSaved={() => { setEditingJob(null); window.location.reload() }}
+        />
       )}
     </div>
   )
