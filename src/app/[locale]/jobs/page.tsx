@@ -11,6 +11,7 @@ interface SearchParams {
   salaryMin?: string
   page?: string
   sort?: string
+  [key: string]: string | undefined
 }
 
 async function getJobs(params: SearchParams) {
