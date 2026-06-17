@@ -21,6 +21,19 @@ services:
       timeout: 5s
       retries: 5
 
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://kormand:kormand_pass@postgres:5432/kormand_db
+    command: npx prisma migrate deploy
+    restart: 'no'
+
   app:
     build:
       context: .
