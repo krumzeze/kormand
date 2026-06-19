@@ -9,7 +9,7 @@ const intlMiddleware = createMiddleware({
   localePrefix: 'always',
 })
 
-const protectedPaths = ['/dashboard', '/post-job']
+const protectedPaths = ['/dashboard', '/post-job', '/settings']
 
 export default async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl

@@ -5,7 +5,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { useTranslations, useLocale } from 'next-intl'
 import { Link, usePathname } from '@/i18n/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Briefcase, User, LogOut, ChevronDown, Globe, ShieldCheck } from 'lucide-react'
+import { Menu, X, Briefcase, User, LogOut, ChevronDown, Globe, ShieldCheck, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 
@@ -141,6 +141,14 @@ export default function Header() {
                           {t('admin')}
                         </Link>
                       )}
+                      <Link
+                        href="/settings"
+                        className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <Settings className="w-4 h-4 text-muted" />
+                        {t('settings')}
+                      </Link>
                       <hr className="my-1 border-black/5" />
                       <button
                         onClick={() => { signOut({ callbackUrl: `/${locale}` }); setUserMenuOpen(false) }}
@@ -224,6 +232,15 @@ export default function Header() {
                     </Link>
                   </motion.div>
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.31 }}>
+                    <Link
+                      href="/settings"
+                      className="text-xl font-medium text-muted hover:text-ink transition-colors"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {t('settings')}
+                    </Link>
+                  </motion.div>
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}>
                     <button
                       onClick={() => { signOut({ callbackUrl: `/${locale}` }); setMenuOpen(false) }}
                       className="text-xl font-medium text-red-400 hover:text-red-500 transition-colors"

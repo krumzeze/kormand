@@ -79,6 +79,11 @@ export const roleUpdateSchema = z.object({
   isRoot: z.boolean().optional().default(false),
 })
 
+export const passwordChangeSchema = z.object({
+  currentPassword: z.string().min(1, 'Введите текущий пароль'),
+  newPassword: z.string().min(8, 'Минимум 8 символов'),
+})
+
 export type RegisterInput = z.infer<typeof registerSchema>
 export type JobInput = z.infer<typeof jobSchema>
 export type ApplicationInput = z.infer<typeof applicationSchema>
