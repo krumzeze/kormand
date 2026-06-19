@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import { canModerate } from '@/lib/authz'
 import { jobSchema } from '@/lib/validations'
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
@@ -13,6 +14,12 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
   })
 
   if (!job) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+
+  if (job.isBlocked) {
+    const session = await auth()
+    const allowed = !!session && (session.user.id === job.company.ownerId || canModerate(session.user.role))
+    if (!allowed) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+  }
 
   // Increment views
   await prisma.job.update({ where: { id: params.id }, data: { views: { increment: 1 } } })
@@ -31,7 +38,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (!job) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
 
   const isOwner = job.company.ownerId === session.user.id
-  if (!isOwner && session.user.role !== 'ADMIN') {
+  if (!isOwner && !canModerate(session.user.role)) {
     return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
   }
 
@@ -59,7 +66,7 @@ export async function DELETE(_: NextRequest, { params }: { params: { id: string 
   if (!job) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
 
   const isOwner = job.company.ownerId === session.user.id
-  if (!isOwner && session.user.role !== 'ADMIN') {
+  if (!isOwner && !canModerate(session.user.role)) {
     return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
   }
 

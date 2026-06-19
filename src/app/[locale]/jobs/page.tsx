@@ -23,7 +23,7 @@ async function getJobs(params: SearchParams) {
   const pageNum = Number(page)
   const limit = 12
 
-  const where: any = { isActive: true }
+  const where: any = { isActive: true, isBlocked: false }
   if (q) {
     where.OR = [
       { title: { contains: q, mode: 'insensitive' } },
@@ -45,7 +45,7 @@ async function getJobs(params: SearchParams) {
       skip: (pageNum - 1) * limit,
       take: limit,
       include: {
-        company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true } },
+        company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true, isVerified: true } },
         _count: { select: { applications: true } },
       },
     }),

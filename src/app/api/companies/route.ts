@@ -5,8 +5,9 @@ import { companyProfileSchema } from '@/lib/validations'
 
 export async function GET() {
   const companies = await prisma.company.findMany({
+    where: { isBlocked: false },
     include: {
-      _count: { select: { jobs: { where: { isActive: true } } } },
+      _count: { select: { jobs: { where: { isActive: true, isBlocked: false } } } },
     },
     orderBy: { ratingAvg: 'desc' },
   })

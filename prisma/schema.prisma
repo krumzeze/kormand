@@ -10,6 +10,7 @@ datasource db {
 enum Role {
   CANDIDATE
   EMPLOYER
+  MODERATOR
   ADMIN
 }
 
@@ -42,11 +43,23 @@ enum ApplicationStatus {
   ACCEPTED
 }
 
+enum ReportTarget {
+  JOB
+  COMPANY
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
   passwordHash String
   role         Role     @default(CANDIDATE)
+  isRoot       Boolean  @default(false)
   name         String
   phone        String?
   avatarUrl    String?
@@ -54,9 +67,11 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  candidate    CandidateProfile?
-  company      Company?
-  applications Application[]
+  candidate      CandidateProfile?
+  company        Company?
+  applications   Application[]
+  reports        Report[]          @relation("reporter")
+  handledReports Report[]          @relation("handler")
 
   @@map("users")
 }
@@ -87,10 +102,15 @@ model Company {
   city        String?
   industry    String?
   ratingAvg   Float   @default(0)
+  isVerified  Boolean  @default(false)
+  verifiedAt  DateTime?
+  isBlocked   Boolean  @default(false)
+  blockReason String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  jobs Job[]
+  jobs    Job[]
+  reports Report[]
 
   @@map("companies")
 }
@@ -111,11 +131,14 @@ model Job {
   category    String
   isActive    Boolean         @default(true)
   isFeatured  Boolean         @default(false)
+  isBlocked   Boolean         @default(false)
+  blockReason String?
   views       Int             @default(0)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
   applications Application[]
+  reports      Report[]
 
   @@index([city, category, type])
   @@index([isActive, isFeatured])
@@ -136,4 +159,25 @@ model Application {
 
   @@unique([jobId, userId])
   @@map("applications")
+}
+
+model Report {
+  id         String       @id @default(cuid())
+  target     ReportTarget
+  jobId      String?
+  job        Job?         @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  companyId  String?
+  company    Company?     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User         @relation("reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reason     String
+  details    String?
+  status     ReportStatus @default(OPEN)
+  handledById String?
+  handledBy  User?        @relation("handler", fields: [handledById], references: [id], onDelete: SetNull)
+  resolvedAt DateTime?
+  createdAt  DateTime     @default(now())
+
+  @@index([status])
+  @@map("reports")
 }

@@ -10,6 +10,7 @@ async function main() {
   console.log('🌱 Seeding database...')
 
   // Clear existing data
+  await prisma.report.deleteMany()
   await prisma.application.deleteMany()
   await prisma.job.deleteMany()
   await prisma.company.deleteMany()
@@ -19,13 +20,34 @@ async function main() {
   const hash = (pwd: string) => bcrypt.hashSync(pwd, 10)
 
   // ── Users ──────────────────────────────────────────────────────────
+  const owner = await prisma.user.create({
+    data: {
+      email: 'owner@test.tj',
+      passwordHash: hash('test1234'),
+      role: Role.ADMIN,
+      isRoot: true,
+      name: 'Owner',
+      phone: '+992900000001',
+    },
+  })
+
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@kormand.tj',
-      passwordHash: hash('admin123'),
+      email: 'admin@test.tj',
+      passwordHash: hash('test1234'),
       role: Role.ADMIN,
-      name: 'Admin Kormand',
+      name: 'Admin',
       phone: '+992900000000',
+    },
+  })
+
+  const moderator = await prisma.user.create({
+    data: {
+      email: 'moderator@test.tj',
+      passwordHash: hash('test1234'),
+      role: Role.MODERATOR,
+      name: 'Moderator',
+      phone: '+992900000002',
     },
   })
 
@@ -352,10 +374,33 @@ async function main() {
     },
   })
 
+  // ── Reports ─────────────────────────────────────────────────────────
+  await prisma.report.create({
+    data: {
+      target: 'JOB',
+      jobId: jobs[8].id, // Стажёр-разработчик
+      reporterId: candidate2.id,
+      reason: 'Подозрение на мошенничество',
+      details: 'Зарплата для стажёра выглядит подозрительно, требуют предоплату.',
+    },
+  })
+
+  await prisma.report.create({
+    data: {
+      target: 'COMPANY',
+      companyId: companies[1].id, // TalentPlus
+      reporterId: candidate1.id,
+      reason: 'Недостоверная информация',
+      details: 'Сайт компании не открывается.',
+    },
+  })
+
   console.log('✅ Seed complete!')
   console.log('')
   console.log('Test accounts:')
-  console.log('  admin@kormand.tj / admin123 (ADMIN)')
+  console.log('  owner@test.tj / test1234 (OWNER, isRoot)')
+  console.log('  admin@test.tj / test1234 (ADMIN)')
+  console.log('  moderator@test.tj / test1234 (MODERATOR)')
   console.log('  employer@techasia.tj / employer123 (EMPLOYER)')
   console.log('  hr@talentplus.tj / employer123 (EMPLOYER)')
   console.log('  jobs@dushanbesoft.tj / employer123 (EMPLOYER)')

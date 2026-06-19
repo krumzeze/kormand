@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import JobCard from './JobCard'
+import ReportButton from '@/components/ReportButton'
 import { formatSalary, timeAgo } from '@/lib/utils'
 import { toast } from '@/components/ui/Toaster'
 
@@ -249,6 +250,10 @@ export default function JobDetailClient({ job, similar, matchScore, alreadyAppli
                     <Link href="/auth/login" className="text-sky-blue hover:underline">Войдите</Link>, чтобы откликнуться
                   </p>
                 )}
+
+                <div className="mt-4 pt-4 border-t border-black/5 flex justify-center">
+                  <ReportButton target="JOB" jobId={job.id} />
+                </div>
               </div>
             </motion.div>
 

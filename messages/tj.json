@@ -6,7 +6,8 @@
     "login": "Даромадан",
     "register": "Бақайдгирӣ",
     "dashboard": "Кабинети шахсӣ",
-    "logout": "Баромадан"
+    "logout": "Баромадан",
+    "admin": "Панели админ"
   },
   "hero": {
     "badge": "Платформаи №1 дар Тоҷикистон",
@@ -214,5 +215,93 @@
     "to": "то",
     "tjs": "сомонӣ",
     "usd": "USD"
+  },
+  "report": {
+    "button": "Шикоят",
+    "title": "Шикоят кардан",
+    "reason": "Сабаб",
+    "reasons": {
+      "fraud": "Қаллобӣ",
+      "spam": "Спам",
+      "misleading": "Маълумоти нодуруст",
+      "offensive": "Мӯҳтавои таҳқиромез",
+      "other": "Дигар"
+    },
+    "details": "Тафсилот (ихтиёрӣ)",
+    "detailsPlaceholder": "Мушкилотро муфассалтар тавсиф кунед...",
+    "submit": "Фиристодан",
+    "cancel": "Бекор кардан",
+    "success": "Шикоят фиристода шуд. Ташаккур!",
+    "error": "Шикоятро фиристода нашуд",
+    "reasonRequired": "Сабабро интихоб кунед"
+  },
+  "admin": {
+    "title": "Модерация",
+    "owner": "Соҳиб",
+    "empty": "Холӣ",
+    "actionError": "Амалро иҷро карда нашуд",
+    "nav": {
+      "dashboard": "Шарҳ",
+      "jobs": "Ҷойҳои кор",
+      "companies": "Ширкатҳо",
+      "reports": "Шикоятҳо",
+      "users": "Корбарон"
+    },
+    "dashboard": {
+      "title": "Шарҳ",
+      "jobs": "ҷойи кор",
+      "companies": "ширкат",
+      "openReports": "шикоятҳои кушода",
+      "users": "корбар",
+      "blocked": "басташуда",
+      "verified": "тасдиқшуда"
+    },
+    "jobs": {
+      "block": "Бастан",
+      "unblock": "Кушодан",
+      "blocked": "Ҷойи кор баста шуд",
+      "unblocked": "Ҷойи кор кушода шуд",
+      "blockedTag": "Басташуда",
+      "inactive": "Ғайрифаъол",
+      "blockReasonPrompt": "Сабаби бастан (ихтиёрӣ):"
+    },
+    "companies": {
+      "verify": "Тасдиқ кардан",
+      "unverify": "Бекор кардани нишона",
+      "verified": "Ширкат тасдиқ шуд",
+      "unverified": "Нишона бекор шуд",
+      "block": "Бастан",
+      "unblock": "Кушодан",
+      "blocked": "Ширкат баста шуд",
+      "unblocked": "Ширкат кушода шуд",
+      "blockedTag": "Басташуда",
+      "jobsCount": "ҷойи кор",
+      "blockReasonPrompt": "Сабаби бастан (ихтиёрӣ):"
+    },
+    "reports": {
+      "by": "Аз",
+      "resolve": "Чора дидан",
+      "dismiss": "Рад кардан",
+      "handled": "Шикоят коркард шуд",
+      "target": {
+        "JOB": "Ҷойи кор",
+        "COMPANY": "Ширкат"
+      },
+      "status": {
+        "OPEN": "Кушода",
+        "RESOLVED": "Ҳалшуда",
+        "DISMISSED": "Радшуда"
+      }
+    },
+    "users": {
+      "roleChanged": "Нақш иваз шуд",
+      "roles": {
+        "CANDIDATE": "Коҷӯй",
+        "EMPLOYER": "Корфармо",
+        "MODERATOR": "Модератор",
+        "ADMIN": "Админ",
+        "OWNER": "Соҳиб"
+      }
+    }
   }
 }

@@ -16,14 +16,18 @@ export default async function middleware(req: NextRequest) {
 
   // Strip locale prefix for path checks
   const pathWithoutLocale = pathname.replace(/^\/(ru|tj)/, '') || '/'
+  const locale = pathname.split('/')[1] || defaultLocale
 
   const isProtected = protectedPaths.some(p => pathWithoutLocale.startsWith(p))
+  const isAdminArea = pathWithoutLocale.startsWith('/admin')
 
-  if (isProtected) {
+  if (isProtected || isAdminArea) {
     const session = await auth()
     if (!session) {
-      const locale = pathname.split('/')[1] || defaultLocale
       return NextResponse.redirect(new URL(`/${locale}/auth/login`, req.url))
+    }
+    if (isAdminArea && session.user.role !== 'ADMIN' && session.user.role !== 'MODERATOR') {
+      return NextResponse.redirect(new URL(`/${locale}`, req.url))
     }
   }
 

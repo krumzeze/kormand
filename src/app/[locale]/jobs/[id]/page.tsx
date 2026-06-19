@@ -17,7 +17,7 @@ export default async function JobDetailPage({ params }: Props) {
     },
   })
 
-  if (!job || !job.isActive) notFound()
+  if (!job || !job.isActive || job.isBlocked) notFound()
 
   // Increment views
   await prisma.job.update({ where: { id: params.id }, data: { views: { increment: 1 } } })
@@ -46,10 +46,11 @@ export default async function JobDetailPage({ params }: Props) {
       id: { not: job.id },
       category: job.category,
       isActive: true,
+      isBlocked: false,
     },
     take: 3,
     include: {
-      company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true } },
+      company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true, isVerified: true } },
       _count: { select: { applications: true } },
     },
   })

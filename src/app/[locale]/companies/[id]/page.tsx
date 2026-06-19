@@ -1,14 +1,15 @@
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { MapPin, Globe, Star, Briefcase } from 'lucide-react'
+import { MapPin, Globe, Star, Briefcase, BadgeCheck } from 'lucide-react'
 import JobCard from '@/components/jobs/JobCard'
+import ReportButton from '@/components/ReportButton'
 
 export default async function CompanyPage({ params }: { params: { id: string } }) {
   const company = await prisma.company.findUnique({
     where: { id: params.id },
     include: {
       jobs: {
-        where: { isActive: true },
+        where: { isActive: true, isBlocked: false },
         orderBy: { createdAt: 'desc' },
         include: {
           company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true } },
@@ -18,7 +19,7 @@ export default async function CompanyPage({ params }: { params: { id: string } }
     },
   })
 
-  if (!company) notFound()
+  if (!company || company.isBlocked) notFound()
 
   return (
     <div className="pt-28 pb-24 max-w-5xl mx-auto px-4 md:px-8">
@@ -33,7 +34,14 @@ export default async function CompanyPage({ params }: { params: { id: string } }
               }
             </div>
             <div className="flex-1">
-              <h1 className="font-heading font-bold text-ink text-3xl">{company.name}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="font-heading font-bold text-ink text-3xl">{company.name}</h1>
+                {company.isVerified && (
+                  <span className="inline-flex items-center gap-1 text-sm font-medium text-sky-blue bg-sky-light border border-sky-blue/20 rounded-full px-2.5 py-1">
+                    <BadgeCheck className="w-4 h-4" /> Проверено
+                  </span>
+                )}
+              </div>
               {company.industry && <p className="text-muted mt-1">{company.industry}</p>}
               <div className="flex flex-wrap items-center gap-4 mt-4">
                 {company.city && (
@@ -59,6 +67,9 @@ export default async function CompanyPage({ params }: { params: { id: string } }
           {company.description && (
             <p className="text-muted leading-relaxed mt-6 pt-6 border-t border-black/5">{company.description}</p>
           )}
+          <div className="mt-6 pt-6 border-t border-black/5">
+            <ReportButton target="COMPANY" companyId={company.id} />
+          </div>
         </div>
       </div>
 

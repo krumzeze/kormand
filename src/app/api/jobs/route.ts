@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   const sort = searchParams.get('sort') || 'newest'
   const featured = searchParams.get('featured') === 'true'
 
-  const where: any = { isActive: true }
+  const where: any = { isActive: true, isBlocked: false }
 
   if (q) {
     where.OR = [
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       take: limit,
       include: {
         company: {
-          select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true },
+          select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true, isVerified: true },
         },
         _count: { select: { applications: true } },
       },

@@ -1,11 +1,12 @@
 import { prisma } from '@/lib/prisma'
 import { Link } from '@/i18n/navigation'
-import { MapPin, Star, Briefcase, Globe } from 'lucide-react'
+import { MapPin, Star, Briefcase, BadgeCheck } from 'lucide-react'
 
 export default async function CompaniesPage() {
   const companies = await prisma.company.findMany({
+    where: { isBlocked: false },
     include: {
-      _count: { select: { jobs: { where: { isActive: true } } } },
+      _count: { select: { jobs: { where: { isActive: true, isBlocked: false } } } },
     },
     orderBy: { ratingAvg: 'desc' },
   })
@@ -27,7 +28,12 @@ export default async function CompaniesPage() {
                 <div className="w-14 h-14 rounded-2xl bg-sky-light text-sky-blue flex items-center justify-center text-xl font-bold font-heading mb-4">
                   {company.name[0]}
                 </div>
-                <h3 className="font-heading font-semibold text-ink text-lg group-hover:text-sky-blue transition-colors">{company.name}</h3>
+                <div className="flex items-center gap-1.5">
+                  <h3 className="font-heading font-semibold text-ink text-lg group-hover:text-sky-blue transition-colors">{company.name}</h3>
+                  {company.isVerified && (
+                    <BadgeCheck className="w-4 h-4 text-sky-blue flex-shrink-0" aria-label="Проверенная компания" />
+                  )}
+                </div>
                 {company.industry && <p className="text-xs text-muted mt-1">{company.industry}</p>}
                 {company.description && (
                   <p className="text-sm text-muted mt-3 line-clamp-2 leading-relaxed">{company.description}</p>

@@ -33,12 +33,13 @@ export default async function CandidatePage({ params }: { params: { locale: stri
     ? await prisma.job.findMany({
         where: {
           isActive: true,
+          isBlocked: false,
           skills: { hasSome: profile.skills },
         },
         take: 4,
         orderBy: { createdAt: 'desc' },
         include: {
-          company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true } },
+          company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true, isVerified: true } },
           _count: { select: { applications: true } },
         },
       })

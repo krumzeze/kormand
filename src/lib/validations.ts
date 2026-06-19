@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { JobType, ExperienceLevel, Currency, Role } from '@prisma/client'
+import { JobType, ExperienceLevel, Currency, Role, ReportTarget } from '@prisma/client'
 
 export const registerSchema = z.object({
   name: z.string().min(2, 'Укажите имя'),
@@ -46,6 +46,37 @@ export const companyProfileSchema = z.object({
   website: z.string().url('Некорректный URL').optional().or(z.literal('')),
   city: z.string().optional(),
   industry: z.string().optional(),
+})
+
+export const moderateJobSchema = z.object({
+  isBlocked: z.boolean(),
+  blockReason: z.string().max(500).optional(),
+})
+
+export const moderateCompanySchema = z.object({
+  isBlocked: z.boolean().optional(),
+  blockReason: z.string().max(500).optional(),
+  isVerified: z.boolean().optional(),
+})
+
+export const reportSchema = z.object({
+  target: z.nativeEnum(ReportTarget),
+  jobId: z.string().cuid().optional(),
+  companyId: z.string().cuid().optional(),
+  reason: z.string().min(3, 'Укажите причину').max(200),
+  details: z.string().max(1000).optional(),
+}).refine(
+  d => (d.target === 'JOB' && !!d.jobId) || (d.target === 'COMPANY' && !!d.companyId),
+  { message: 'Не указан объект жалобы' },
+)
+
+export const reportUpdateSchema = z.object({
+  status: z.enum(['RESOLVED', 'DISMISSED']),
+})
+
+export const roleUpdateSchema = z.object({
+  role: z.nativeEnum(Role),
+  isRoot: z.boolean().optional().default(false),
 })
 
 export type RegisterInput = z.infer<typeof registerSchema>

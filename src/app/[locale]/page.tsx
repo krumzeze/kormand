@@ -7,21 +7,22 @@ import CTASection from '@/components/home/CTASection'
 
 async function getHomeData() {
   const [jobCount, companyCount, featuredJobs, companies] = await Promise.all([
-    prisma.job.count({ where: { isActive: true } }),
-    prisma.company.count(),
+    prisma.job.count({ where: { isActive: true, isBlocked: false } }),
+    prisma.company.count({ where: { isBlocked: false } }),
     prisma.job.findMany({
-      where: { isActive: true },
+      where: { isActive: true, isBlocked: false },
       orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
       take: 8,
       include: {
-        company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true } },
+        company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true, isVerified: true } },
         _count: { select: { applications: true } },
       },
     }),
     prisma.company.findMany({
+      where: { isBlocked: false },
       take: 6,
       orderBy: { ratingAvg: 'desc' },
-      include: { _count: { select: { jobs: { where: { isActive: true } } } } },
+      include: { _count: { select: { jobs: { where: { isActive: true, isBlocked: false } } } } },
     }),
   ])
 

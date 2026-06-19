@@ -3,14 +3,14 @@
 import { motion } from 'framer-motion'
 import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
-import { MapPin, Star, Eye, Clock, ArrowUpRight, Zap } from 'lucide-react'
+import { MapPin, Star, Eye, Clock, ArrowUpRight, Zap, BadgeCheck } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import { formatSalary, timeAgo } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import type { Job, Company } from '@prisma/client'
 
 type JobWithCompany = Job & {
-  company: Pick<Company, 'id' | 'name' | 'logoUrl' | 'ratingAvg' | 'city'>
+  company: Pick<Company, 'id' | 'name' | 'logoUrl' | 'ratingAvg' | 'city'> & { isVerified?: boolean }
   _count?: { applications: number }
   matchScore?: number
 }
@@ -67,7 +67,10 @@ export default function JobCard({ job, index = 0, compact = false }: JobCardProp
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-muted truncate">{job.company.name}</p>
+                  <p className="text-xs text-muted truncate flex items-center gap-1">
+                    {job.company.name}
+                    {job.company.isVerified && <BadgeCheck className="w-3 h-3 text-sky-blue flex-shrink-0" />}
+                  </p>
                   <h3 className="font-heading font-semibold text-ink text-base leading-tight mt-0.5 truncate group-hover:text-sky-blue transition-colors duration-300">
                     {job.title}
                   </h3>
