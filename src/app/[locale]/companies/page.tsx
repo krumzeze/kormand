@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { Link } from '@/i18n/navigation'
-import { MapPin, Star, Briefcase, BadgeCheck } from 'lucide-react'
+import { MapPin, Star, Briefcase } from 'lucide-react'
+import VerifiedBadge from '@/components/VerifiedBadge'
 
 export default async function CompaniesPage() {
   const companies = await prisma.company.findMany({
@@ -30,9 +31,7 @@ export default async function CompaniesPage() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <h3 className="font-heading font-semibold text-ink text-lg group-hover:text-sky-blue transition-colors">{company.name}</h3>
-                  {company.isVerified && (
-                    <BadgeCheck className="w-4 h-4 text-sky-blue flex-shrink-0" aria-label="Проверенная компания" />
-                  )}
+                  {company.isVerified && <VerifiedBadge />}
                 </div>
                 {company.industry && <p className="text-xs text-muted mt-1">{company.industry}</p>}
                 {company.description && (

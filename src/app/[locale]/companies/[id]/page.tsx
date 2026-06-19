@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { MapPin, Globe, Star, Briefcase, BadgeCheck } from 'lucide-react'
+import { MapPin, Globe, Star, Briefcase } from 'lucide-react'
 import JobCard from '@/components/jobs/JobCard'
 import ReportButton from '@/components/ReportButton'
+import VerifiedBadge from '@/components/VerifiedBadge'
 
 export default async function CompanyPage({ params }: { params: { id: string } }) {
   const company = await prisma.company.findUnique({
@@ -36,11 +37,7 @@ export default async function CompanyPage({ params }: { params: { id: string } }
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h1 className="font-heading font-bold text-ink text-3xl">{company.name}</h1>
-                {company.isVerified && (
-                  <span className="inline-flex items-center gap-1 text-sm font-medium text-sky-blue bg-sky-light border border-sky-blue/20 rounded-full px-2.5 py-1">
-                    <BadgeCheck className="w-4 h-4" /> Проверено
-                  </span>
-                )}
+                {company.isVerified && <VerifiedBadge withLabel />}
               </div>
               {company.industry && <p className="text-muted mt-1">{company.industry}</p>}
               <div className="flex flex-wrap items-center gap-4 mt-4">
