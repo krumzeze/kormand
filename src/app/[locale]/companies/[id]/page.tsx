@@ -13,7 +13,7 @@ export default async function CompanyPage({ params }: { params: { id: string } }
         where: { isActive: true, isBlocked: false },
         orderBy: { createdAt: 'desc' },
         include: {
-          company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true } },
+          company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true, isVerified: true } },
           _count: { select: { applications: true } },
         },
       },

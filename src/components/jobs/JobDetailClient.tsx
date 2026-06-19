@@ -11,6 +11,7 @@ import {
 import Badge from '@/components/ui/Badge'
 import JobCard from './JobCard'
 import ReportButton from '@/components/ReportButton'
+import VerifiedBadge from '@/components/VerifiedBadge'
 import { formatSalary, timeAgo } from '@/lib/utils'
 import { toast } from '@/components/ui/Toaster'
 
@@ -104,7 +105,10 @@ export default function JobDetailClient({ job, similar, matchScore, alreadyAppli
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm text-muted">{job.company.name}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm text-muted">{job.company.name}</p>
+                        {job.company.isVerified && <VerifiedBadge />}
+                      </div>
                       <h1 className="font-heading font-bold text-ink text-2xl md:text-3xl mt-1 leading-tight">
                         {job.title}
                       </h1>
@@ -271,7 +275,10 @@ export default function JobDetailClient({ job, similar, matchScore, alreadyAppli
                     {job.company.name[0]}
                   </div>
                   <div>
-                    <p className="font-medium text-ink text-sm">{job.company.name}</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-medium text-ink text-sm">{job.company.name}</p>
+                      {job.company.isVerified && <VerifiedBadge />}
+                    </div>
                     {job.company.industry && <p className="text-xs text-muted">{job.company.industry}</p>}
                   </div>
                 </div>
