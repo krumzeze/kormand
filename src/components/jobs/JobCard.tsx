@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Link } from '@/i18n/navigation'
+import { Link, useRouter } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { MapPin, Star, Eye, Clock, ArrowUpRight, Zap } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 import type { Job, Company } from '@prisma/client'
 
 type JobWithCompany = Job & {
-  company: Pick<Company, 'id' | 'name' | 'logoUrl' | 'ratingAvg' | 'city'> & { isVerified?: boolean }
+  company: Pick<Company, 'id' | 'name' | 'logoUrl' | 'ratingAvg' | 'cities'> & { isVerified?: boolean }
   _count?: { applications: number }
   matchScore?: number
 }
@@ -41,7 +41,16 @@ interface JobCardProps {
 
 export default function JobCard({ job, index = 0, compact = false }: JobCardProps) {
   const t = useTranslations('jobs')
+  const router = useRouter()
   const salary = formatSalary(job.salaryMin, job.salaryMax, job.currency)
+
+  // Карточка целиком — ссылка на вакансию; имя компании ведёт на её профиль,
+  // поэтому гасим всплытие, чтобы не сработал внешний <Link>.
+  const openCompany = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    router.push(`/companies/${job.company.id}`)
+  }
 
   return (
     <motion.div
@@ -69,7 +78,15 @@ export default function JobCard({ job, index = 0, compact = false }: JobCardProp
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1">
-                    <p className="text-xs text-muted truncate">{job.company.name}</p>
+                    <span
+                      role="link"
+                      tabIndex={0}
+                      onClick={openCompany}
+                      onKeyDown={e => { if (e.key === 'Enter') openCompany(e as any) }}
+                      className="text-xs text-muted truncate hover:text-sky-blue hover:underline cursor-pointer"
+                    >
+                      {job.company.name}
+                    </span>
                     {job.company.isVerified && <VerifiedBadge />}
                   </div>
                   <h3 className="font-heading font-semibold text-ink text-base leading-tight mt-0.5 truncate group-hover:text-sky-blue transition-colors duration-300">

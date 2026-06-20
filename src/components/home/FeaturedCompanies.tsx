@@ -60,7 +60,7 @@ export default function FeaturedCompanies({ companies }: FeaturedCompaniesProps)
                 transition={{ delay: i * 0.08, duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
               >
                 {/* Double bezel */}
-                <div className="p-1.5 rounded-3xl bg-black/[0.03] ring-1 ring-black/5 group transition-all duration-500 hover:shadow-card-hover hover:-translate-y-1 hover:ring-sky-blue/20">
+                <Link href={`/companies/${company.id}`} className="block p-1.5 rounded-3xl bg-black/[0.03] ring-1 ring-black/5 group transition-all duration-500 hover:shadow-card-hover hover:-translate-y-1 hover:ring-sky-blue/20">
                   <div className="rounded-[calc(1.5rem-0.375rem)] bg-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] p-6">
                     <div className="flex items-start justify-between">
                       <div
@@ -96,12 +96,12 @@ export default function FeaturedCompanies({ companies }: FeaturedCompaniesProps)
                         </div>
                         {company._count.jobs} вакансий
                       </div>
-                      {company.city && (
-                        <span className="text-xs text-muted ml-auto">{company.city}</span>
+                      {company.cities?.length > 0 && (
+                        <span className="text-xs text-muted ml-auto truncate max-w-[40%]">{company.cities.join(', ')}</span>
                       )}
                     </div>
                   </div>
-                </div>
+                </Link>
               </motion.div>
             )
           })}

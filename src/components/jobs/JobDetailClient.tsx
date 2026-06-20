@@ -270,18 +270,21 @@ export default function JobDetailClient({ job, similar, matchScore, alreadyAppli
             >
               <div className="rounded-[calc(1.5rem-0.375rem)] bg-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] p-6">
                 <h3 className="font-heading font-semibold text-ink mb-4">{t('jobs.aboutCompany')}</h3>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-bold font-heading bg-sky-light text-sky-blue">
-                    {job.company.name[0]}
+                <Link href={`/companies/${job.company.id}`} className="flex items-center gap-3 mb-4 group/company">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-bold font-heading bg-sky-light text-sky-blue overflow-hidden flex-shrink-0">
+                    {job.company.logoUrl
+                      ? <img src={job.company.logoUrl} alt={job.company.name} className="w-full h-full object-cover" />
+                      : job.company.name[0]
+                    }
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <p className="font-medium text-ink text-sm">{job.company.name}</p>
+                      <p className="font-medium text-ink text-sm group-hover/company:text-sky-blue transition-colors">{job.company.name}</p>
                       {job.company.isVerified && <VerifiedBadge />}
                     </div>
                     {job.company.industry && <p className="text-xs text-muted">{job.company.industry}</p>}
                   </div>
-                </div>
+                </Link>
 
                 {job.company.description && (
                   <p className="text-sm text-muted leading-relaxed mb-4">{job.company.description}</p>
@@ -292,10 +295,10 @@ export default function JobDetailClient({ job, similar, matchScore, alreadyAppli
                     <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                     {job.company.ratingAvg.toFixed(1)}
                   </div>
-                  {job.company.city && (
+                  {job.company.cities?.length > 0 && (
                     <div className="flex items-center gap-1.5 text-xs text-muted">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {job.company.city}
+                      <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                      {job.company.cities.join(', ')}
                     </div>
                   )}
                   {job.company.website && (
@@ -310,6 +313,14 @@ export default function JobDetailClient({ job, similar, matchScore, alreadyAppli
                     </a>
                   )}
                 </div>
+
+                <Link
+                  href={`/companies/${job.company.id}`}
+                  className="mt-4 flex items-center justify-center gap-2 rounded-2xl border border-black/10 py-2.5 text-sm font-medium text-ink hover:border-sky-blue/40 hover:text-sky-blue transition-all"
+                >
+                  <Building2 className="w-4 h-4" />
+                  {t('jobs.viewCompany')}
+                </Link>
               </div>
             </motion.div>
           </div>

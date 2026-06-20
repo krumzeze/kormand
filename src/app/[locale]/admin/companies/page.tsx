@@ -16,7 +16,7 @@ export default async function AdminCompaniesPage() {
         companies={companies.map(c => ({
           id: c.id,
           name: c.name,
-          city: c.city,
+          cities: c.cities,
           jobs: c._count.jobs,
           isVerified: c.isVerified,
           isBlocked: c.isBlocked,

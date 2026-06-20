@@ -96,9 +96,11 @@ export default function Header() {
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="flex items-center gap-2 rounded-full pl-3 pr-2 py-2 text-sm font-medium text-ink hover:bg-black/5 transition-all duration-300"
                 >
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs text-white font-bold"
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs text-white font-bold overflow-hidden"
                     style={{ background: 'linear-gradient(135deg, #C7B6FF 0%, #7FB3FF 100%)' }}>
-                    {session.user.name?.[0]?.toUpperCase()}
+                    {session.user.image
+                      ? <img src={session.user.image} alt="" className="w-full h-full object-cover" />
+                      : session.user.name?.[0]?.toUpperCase()}
                   </div>
                   <span className="hidden lg:block max-w-24 truncate">{session.user.name}</span>
                   <ChevronDown className={cn('w-3.5 h-3.5 transition-transform duration-300', userMenuOpen && 'rotate-180')} />

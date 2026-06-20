@@ -99,7 +99,7 @@ model Company {
   logoUrl     String?
   description String?
   website     String?
-  city        String?
+  cities      String[]
   industry    String?
   ratingAvg   Float   @default(0)
   isVerified  Boolean  @default(false)

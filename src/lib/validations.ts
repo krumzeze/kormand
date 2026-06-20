@@ -44,8 +44,15 @@ export const companyProfileSchema = z.object({
   name: z.string().min(2, 'Укажите название компании'),
   description: z.string().max(2000).optional(),
   website: z.string().url('Некорректный URL').optional().or(z.literal('')),
-  city: z.string().optional(),
+  cities: z.array(z.string().min(1)).max(20).optional(),
   industry: z.string().optional(),
+  logoUrl: z.string().optional().or(z.literal('')),
+})
+
+export const accountSchema = z.object({
+  name: z.string().min(2, 'Укажите имя'),
+  phone: z.string().max(30).optional().or(z.literal('')),
+  avatarUrl: z.string().optional().or(z.literal('')),
 })
 
 export const moderateJobSchema = z.object({

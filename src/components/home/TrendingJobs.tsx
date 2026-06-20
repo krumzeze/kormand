@@ -9,7 +9,7 @@ import { ArrowRight } from 'lucide-react'
 import type { Job, Company } from '@prisma/client'
 
 type JobWithCompany = Job & {
-  company: Pick<Company, 'id' | 'name' | 'logoUrl' | 'ratingAvg' | 'city'>
+  company: Pick<Company, 'id' | 'name' | 'logoUrl' | 'ratingAvg' | 'cities'>
   _count: { applications: number }
 }
 

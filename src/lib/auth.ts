@@ -40,11 +40,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id
         token.role = (user as any).role as Role
         token.isRoot = (user as any).isRoot as boolean
+        token.picture = (user as any).image ?? null
+      }
+      // Живое обновление имени/аватара после правки в настройках (useSession().update)
+      if (trigger === 'update' && session) {
+        if (typeof session.name === 'string') token.name = session.name
+        if ('image' in session) token.picture = session.image ?? null
       }
       return token
     },

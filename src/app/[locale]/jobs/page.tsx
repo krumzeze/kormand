@@ -45,7 +45,7 @@ async function getJobs(params: SearchParams) {
       skip: (pageNum - 1) * limit,
       take: limit,
       include: {
-        company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true, isVerified: true } },
+        company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, cities: true, isVerified: true } },
         _count: { select: { applications: true } },
       },
     }),

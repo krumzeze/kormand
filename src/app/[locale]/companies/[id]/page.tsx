@@ -13,7 +13,7 @@ export default async function CompanyPage({ params }: { params: { id: string } }
         where: { isActive: true, isBlocked: false },
         orderBy: { createdAt: 'desc' },
         include: {
-          company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true, isVerified: true } },
+          company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, cities: true, isVerified: true } },
           _count: { select: { applications: true } },
         },
       },
@@ -41,9 +41,9 @@ export default async function CompanyPage({ params }: { params: { id: string } }
               </div>
               {company.industry && <p className="text-muted mt-1">{company.industry}</p>}
               <div className="flex flex-wrap items-center gap-4 mt-4">
-                {company.city && (
+                {company.cities.length > 0 && (
                   <span className="flex items-center gap-1.5 text-sm text-muted">
-                    <MapPin className="w-4 h-4" /> {company.city}
+                    <MapPin className="w-4 h-4" /> {company.cities.join(', ')}
                   </span>
                 )}
                 <span className="flex items-center gap-1.5 text-sm text-muted">

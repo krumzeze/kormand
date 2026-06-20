@@ -119,7 +119,9 @@ export default function EmployerDashboard({ company, totalViews, totalApplicatio
           <h1 className="font-heading font-bold text-ink" style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}>
             {company.name}
           </h1>
-          {company.industry && <p className="text-muted text-sm mt-1">{company.industry} · {company.city}</p>}
+          {(company.industry || company.cities?.length > 0) && (
+            <p className="text-muted text-sm mt-1">{[company.industry, company.cities?.join(', ')].filter(Boolean).join(' · ')}</p>
+          )}
         </div>
         <Link href="/post-job" className="btn-gradient w-fit">
           <Plus className="w-4 h-4" />
@@ -256,8 +258,10 @@ export default function EmployerDashboard({ company, totalViews, totalApplicatio
                               {job.applications.map((app: any) => (
                                 <div key={app.id} className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-black/[0.02] border border-black/5">
                                   <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-lavender-light text-lavender">
-                                      {app.user.name?.[0]?.toUpperCase()}
+                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-lavender-light text-lavender overflow-hidden">
+                                      {app.user.avatarUrl
+                                        ? <img src={app.user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                                        : app.user.name?.[0]?.toUpperCase()}
                                     </div>
                                     <div>
                                       <p className="text-sm font-medium text-ink">{app.user.name}</p>
@@ -313,8 +317,10 @@ export default function EmployerDashboard({ company, totalViews, totalApplicatio
                   className="p-1.5 rounded-2xl bg-black/[0.03] ring-1 ring-black/5">
                   <div className="rounded-[calc(1rem-0.375rem)] bg-white p-4 flex items-center justify-between gap-4 flex-wrap">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold bg-lavender-light text-lavender">
-                        {app.user.name?.[0]?.toUpperCase()}
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold bg-lavender-light text-lavender overflow-hidden">
+                        {app.user.avatarUrl
+                          ? <img src={app.user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                          : app.user.name?.[0]?.toUpperCase()}
                       </div>
                       <div>
                         <p className="font-medium text-ink text-sm">{app.user.name}</p>

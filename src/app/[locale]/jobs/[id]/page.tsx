@@ -50,7 +50,7 @@ export default async function JobDetailPage({ params }: Props) {
     },
     take: 3,
     include: {
-      company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true, isVerified: true } },
+      company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, cities: true, isVerified: true } },
       _count: { select: { applications: true } },
     },
   })

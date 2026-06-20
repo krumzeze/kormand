@@ -39,7 +39,7 @@ export default async function CandidatePage({ params }: { params: { locale: stri
         take: 4,
         orderBy: { createdAt: 'desc' },
         include: {
-          company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, city: true, isVerified: true } },
+          company: { select: { id: true, name: true, logoUrl: true, ratingAvg: true, cities: true, isVerified: true } },
           _count: { select: { applications: true } },
         },
       })

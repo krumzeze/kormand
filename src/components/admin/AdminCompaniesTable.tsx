@@ -11,7 +11,7 @@ import { toast } from '@/components/ui/Toaster'
 interface Company {
   id: string
   name: string
-  city: string | null
+  cities: string[]
   jobs: number
   isVerified: boolean
   isBlocked: boolean
@@ -64,7 +64,7 @@ export default function AdminCompaniesTable({ companies }: { companies: Company[
               {c.isVerified && <BadgeCheck className="w-4 h-4 text-sky-blue flex-shrink-0" />}
               {c.isBlocked && <Badge variant="danger">{t('companies.blockedTag')}</Badge>}
             </div>
-            <p className="text-xs text-muted truncate">{c.city || '—'} · {c.jobs} {t('companies.jobsCount')}</p>
+            <p className="text-xs text-muted truncate">{c.cities.length > 0 ? c.cities.join(', ') : '—'} · {c.jobs} {t('companies.jobsCount')}</p>
             {c.isBlocked && c.blockReason && <p className="text-xs text-red-500 mt-0.5">{c.blockReason}</p>}
           </div>
           <Link href={`/companies/${c.id}`} className="text-muted hover:text-ink" target="_blank">

@@ -26,8 +26,11 @@ export default async function CompaniesPage() {
           <Link key={company.id} href={`/companies/${company.id}`} className="block group">
             <div className="p-1.5 rounded-3xl bg-black/[0.03] ring-1 ring-black/5 transition-all duration-500 group-hover:shadow-card-hover group-hover:-translate-y-1 group-hover:ring-sky-blue/20">
               <div className="rounded-[calc(1.5rem-0.375rem)] bg-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] p-6">
-                <div className="w-14 h-14 rounded-2xl bg-sky-light text-sky-blue flex items-center justify-center text-xl font-bold font-heading mb-4">
-                  {company.name[0]}
+                <div className="w-14 h-14 rounded-2xl bg-sky-light text-sky-blue flex items-center justify-center text-xl font-bold font-heading mb-4 overflow-hidden">
+                  {company.logoUrl
+                    ? <img src={company.logoUrl} alt={company.name} className="w-full h-full object-cover" />
+                    : company.name[0]
+                  }
                 </div>
                 <div className="flex items-center gap-1.5">
                   <h3 className="font-heading font-semibold text-ink text-lg group-hover:text-sky-blue transition-colors">{company.name}</h3>
@@ -46,10 +49,10 @@ export default async function CompaniesPage() {
                     <Briefcase className="w-3.5 h-3.5 text-sky-blue" />
                     {company._count.jobs} вакансий
                   </span>
-                  {company.city && (
-                    <span className="flex items-center gap-1 text-xs text-muted ml-auto">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {company.city}
+                  {company.cities.length > 0 && (
+                    <span className="flex items-center gap-1 text-xs text-muted ml-auto truncate">
+                      <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                      {company.cities.join(', ')}
                     </span>
                   )}
                 </div>
