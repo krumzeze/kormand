@@ -20,5 +20,7 @@ export async function saveImage(file: File, size = 512): Promise<string> {
   await mkdir(UPLOAD_DIR, { recursive: true })
   const name = `${randomUUID()}.webp`
   await writeFile(path.join(UPLOAD_DIR, name), output)
-  return `/uploads/${name}`
+  // Отдаём через роут, а не как статику: в standalone-сборке Next не
+  // раздаёт файлы, дописанные в /public после билда (см. api/uploads/[file]).
+  return `/api/uploads/${name}`
 }
