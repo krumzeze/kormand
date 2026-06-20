@@ -43,7 +43,14 @@ export default function ImageUpload({ value, onChange, fallback, shape = 'rounde
         const { url } = await res.json()
         onChange(url)
       } else {
-        toast(t('failed'), 'error')
+        const code = await res.json().then(d => d.error).catch(() => null)
+        const map: Record<string, string> = {
+          INVALID_TYPE: t('invalidType'),
+          TOO_LARGE: t('tooLarge'),
+          UPLOAD_FAILED: t('badImage'),
+          UNAUTHORIZED: t('unauthorized'),
+        }
+        toast(res.status === 404 ? t('notDeployed') : (map[code] ?? t('failed')), 'error')
       }
     } catch {
       toast(t('failed'), 'error')
