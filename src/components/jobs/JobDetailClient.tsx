@@ -141,10 +141,10 @@ export default function JobDetailClient({ job, similar, matchScore, alreadyAppli
                       {job.salaryMin && job.salaryMax && (
                         <div className="w-40 h-1.5 rounded-full bg-black/5 mt-2 overflow-hidden">
                           <motion.div
-                            className="h-full rounded-full"
+                            className="h-full w-full rounded-full origin-left"
                             style={{ background: 'linear-gradient(90deg, #7FB3FF 0%, #4FD1C5 100%)' }}
-                            initial={{ width: 0 }}
-                            animate={{ width: `${Math.min(100, (job.salaryMax / 5000) * 100)}%` }}
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: Math.min(1, job.salaryMax / 5000) }}
                             transition={{ delay: 0.4, duration: 1, ease: [0.32, 0.72, 0, 1] }}
                           />
                         </div>

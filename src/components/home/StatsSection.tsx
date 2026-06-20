@@ -9,14 +9,20 @@ function useCountUp(target: number, duration = 1800, inView = false) {
   const [value, setValue] = useState(0)
   useEffect(() => {
     if (!inView) return
-    let start = 0
-    const step = target / (duration / 16)
-    const timer = setInterval(() => {
-      start += step
-      if (start >= target) { setValue(target); clearInterval(timer) }
-      else setValue(Math.floor(start))
-    }, 16)
-    return () => clearInterval(timer)
+    let raf = 0
+    let startTime = 0
+    const tick = (now: number) => {
+      if (!startTime) startTime = now
+      const progress = Math.min(1, (now - startTime) / duration)
+      if (progress < 1) {
+        setValue(Math.floor(target * progress))
+        raf = requestAnimationFrame(tick)
+      } else {
+        setValue(target)
+      }
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
   }, [target, duration, inView])
   return value
 }

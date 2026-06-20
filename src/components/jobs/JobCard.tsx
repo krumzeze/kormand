@@ -143,10 +143,10 @@ export default function JobCard({ job, index = 0, compact = false }: JobCardProp
                 {job.salaryMin && job.salaryMax && (
                   <div className="w-28 h-1 rounded-full bg-black/5 overflow-hidden">
                     <motion.div
-                      className="h-full rounded-full"
+                      className="h-full w-full rounded-full origin-left"
                       style={{ background: 'linear-gradient(90deg, #7FB3FF 0%, #4FD1C5 100%)' }}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(100, (job.salaryMax / 5000) * 100)}%` }}
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: Math.min(1, job.salaryMax / 5000) }}
                       transition={{ delay: index * 0.05 + 0.3, duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
                     />
                   </div>

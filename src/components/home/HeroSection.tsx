@@ -189,8 +189,8 @@ export default function HeroSection({ jobCount }: HeroSectionProps) {
                 key={card.title}
                 className="absolute w-[340px] rounded-3xl p-7 shadow-glass-lg border border-white/80"
                 style={{
-                  background: `${card.color}cc`,
-                  backdropFilter: 'blur(12px)',
+                  background: `${card.color}f2`,
+                  willChange: 'transform',
                   left: i === 0 ? '8%' : i === 1 ? '22%' : '3%',
                   top: i === 0 ? '5%' : i === 1 ? '38%' : '68%',
                   rotate: i === 0 ? '-3deg' : i === 1 ? '2deg' : '-1deg',
@@ -219,7 +219,7 @@ export default function HeroSection({ jobCount }: HeroSectionProps) {
             {/* Central stat bubble */}
             <motion.div
               className="absolute w-40 h-40 rounded-full flex flex-col items-center justify-center shadow-glass-lg border border-white/80 z-10"
-              style={{ background: 'rgba(252,251,249,0.85)', backdropFilter: 'blur(16px)', right: '2%', top: '14%' }}
+              style={{ background: 'rgba(252,251,249,0.96)', willChange: 'transform', right: '2%', top: '14%' }}
               animate={{ scale: [1, 1.04, 1] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             >

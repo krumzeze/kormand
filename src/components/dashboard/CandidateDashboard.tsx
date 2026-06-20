@@ -91,10 +91,10 @@ export default function CandidateDashboard({ profile, applications, recommendati
             </div>
             <div className="w-48 h-2 rounded-full bg-black/5 overflow-hidden">
               <motion.div
-                className="h-full rounded-full"
+                className="h-full w-full rounded-full origin-left"
                 style={{ background: 'linear-gradient(90deg, #7FB3FF 0%, #4FD1C5 100%)' }}
-                initial={{ width: 0 }}
-                animate={{ width: `${completion}%` }}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: completion / 100 }}
                 transition={{ duration: 1, ease: [0.32, 0.72, 0, 1] }}
               />
             </div>

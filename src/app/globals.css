@@ -124,7 +124,7 @@
 
   .blob {
     @apply absolute rounded-full opacity-40 blur-3xl pointer-events-none;
-    animation: blob 8s ease-in-out infinite;
+    will-change: transform;
   }
 }
 

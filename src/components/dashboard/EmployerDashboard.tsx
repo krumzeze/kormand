@@ -368,10 +368,10 @@ export default function EmployerDashboard({ company, totalViews, totalApplicatio
                       <span className="text-xs text-muted w-24 flex-shrink-0">{cfg.label}</span>
                       <div className="flex-1 h-2 rounded-full bg-black/5 overflow-hidden">
                         <motion.div
-                          className="h-full rounded-full"
+                          className="h-full w-full rounded-full origin-left"
                           style={{ background: 'linear-gradient(90deg, #7FB3FF 0%, #4FD1C5 100%)' }}
-                          initial={{ width: 0 }}
-                          whileInView={{ width: `${pct}%` }}
+                          initial={{ scaleX: 0 }}
+                          whileInView={{ scaleX: pct / 100 }}
                           transition={{ duration: 0.8 }}
                         />
                       </div>
