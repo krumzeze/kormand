@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import {
   Briefcase, BarChart3, Building2, Eye, Users, Plus,
   ChevronDown, ChevronRight, CheckCircle2, XCircle, Clock,
-  MessageSquare, Send, Edit3, Zap, Trash2
+  MessageSquare, Send, Edit3, Zap, Trash2, MoreHorizontal,
+  ExternalLink, Power
 } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import { cn, timeAgo } from '@/lib/utils'
@@ -36,6 +37,17 @@ export default function EmployerDashboard({ company, totalViews, totalApplicatio
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
   const [editingJob, setEditingJob] = useState<any | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [menuJobId, setMenuJobId] = useState<string | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!menuJobId) return
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuJobId(null)
+    }
+    document.addEventListener('mousedown', onClick)
+    return () => document.removeEventListener('mousedown', onClick)
+  }, [menuJobId])
 
   const updateApplicationStatus = async (appId: string, status: string) => {
     setUpdatingStatus(appId)
@@ -211,32 +223,51 @@ export default function EmployerDashboard({ company, totalViews, totalApplicatio
                         <Badge variant={job.isActive ? 'success' : 'muted'} dot>
                           {job.isActive ? 'Активна' : 'Не активна'}
                         </Badge>
-                        <div className="flex gap-1">
+                        <div className="relative" ref={menuJobId === job.id ? menuRef : undefined}>
                           <button
-                            onClick={e => { e.stopPropagation(); toggleJobActive(job.id, job.isActive) }}
-                            className="rounded-xl px-3 py-1.5 text-xs text-muted hover:text-ink hover:bg-black/5 transition-all"
+                            onClick={e => { e.stopPropagation(); setMenuJobId(menuJobId === job.id ? null : job.id) }}
+                            className={cn('w-8 h-8 rounded-xl flex items-center justify-center text-muted hover:text-ink hover:bg-black/5 transition-all', menuJobId === job.id && 'bg-black/5 text-ink')}
+                            aria-label="Действия"
                           >
-                            {job.isActive ? t('deactivate') : t('activate')}
+                            <MoreHorizontal className="w-4 h-4" />
                           </button>
-                          <Link href={`/jobs/${job.id}`} onClick={e => e.stopPropagation()}
-                            className="rounded-xl px-3 py-1.5 text-xs text-sky-blue hover:bg-sky-light transition-all">
-                            Открыть
-                          </Link>
-                          <button
-                            onClick={e => { e.stopPropagation(); setEditingJob(job) }}
-                            className="rounded-xl px-3 py-1.5 text-xs text-muted hover:text-ink hover:bg-black/5 transition-all inline-flex items-center gap-1"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                            Изменить
-                          </button>
-                          <button
-                            onClick={e => { e.stopPropagation(); deleteJob(job) }}
-                            disabled={deletingId === job.id}
-                            className="rounded-xl px-3 py-1.5 text-xs text-red-500 hover:bg-red-50 transition-all inline-flex items-center gap-1 disabled:opacity-50"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            Удалить
-                          </button>
+                          <AnimatePresence>
+                            {menuJobId === job.id && (
+                              <motion.div
+                                initial={{ opacity: 0, scale: 0.96, y: -4 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.96, y: -4 }}
+                                transition={{ duration: 0.15 }}
+                                className="absolute right-0 top-10 z-20 w-48 rounded-2xl bg-white p-1.5 shadow-glass-lg ring-1 ring-black/5"
+                                onClick={e => e.stopPropagation()}
+                              >
+                                <Link href={`/jobs/${job.id}`}
+                                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink hover:bg-black/5 transition-colors">
+                                  <ExternalLink className="w-4 h-4 text-muted" /> Открыть
+                                </Link>
+                                <button
+                                  onClick={() => { setMenuJobId(null); setEditingJob(job) }}
+                                  className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink hover:bg-black/5 transition-colors"
+                                >
+                                  <Edit3 className="w-4 h-4 text-muted" /> Изменить
+                                </button>
+                                <button
+                                  onClick={() => { setMenuJobId(null); toggleJobActive(job.id, job.isActive) }}
+                                  className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink hover:bg-black/5 transition-colors"
+                                >
+                                  <Power className="w-4 h-4 text-muted" /> {job.isActive ? t('deactivate') : t('activate')}
+                                </button>
+                                <div className="my-1 h-px bg-black/5" />
+                                <button
+                                  onClick={() => { setMenuJobId(null); deleteJob(job) }}
+                                  disabled={deletingId === job.id}
+                                  className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                                >
+                                  <Trash2 className="w-4 h-4" /> Удалить
+                                </button>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
                         <ChevronDown className={cn('w-4 h-4 text-muted transition-transform duration-300', expandedJob === job.id && 'rotate-180')} />
                       </div>
@@ -257,18 +288,17 @@ export default function EmployerDashboard({ company, totalViews, totalApplicatio
                             <div className="flex flex-col gap-3">
                               {job.applications.map((app: any) => (
                                 <div key={app.id} className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-black/[0.02] border border-black/5">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-lavender-light text-lavender overflow-hidden">
+                                  <Link href={`/dashboard/employer/applications/${app.id}`} className="flex items-center gap-3 min-w-0 group">
+                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-lavender-light text-lavender overflow-hidden flex-shrink-0">
                                       {app.user.avatarUrl
                                         ? <img src={app.user.avatarUrl} alt="" className="w-full h-full object-cover" />
                                         : app.user.name?.[0]?.toUpperCase()}
                                     </div>
-                                    <div>
-                                      <p className="text-sm font-medium text-ink">{app.user.name}</p>
-                                      <a href={`mailto:${app.user.email}`} className="text-xs text-sky-blue hover:underline">{app.user.email}</a>
-                                      {app.user.phone && <span className="text-xs text-muted ml-2">{app.user.phone}</span>}
+                                    <div className="min-w-0">
+                                      <p className="text-sm font-medium text-ink group-hover:text-sky-blue transition-colors truncate">{app.user.name}</p>
+                                      <p className="text-xs text-muted truncate">{app.user.email}{app.user.phone ? ` · ${app.user.phone}` : ''}</p>
                                     </div>
-                                  </div>
+                                  </Link>
                                   <div className="flex items-center gap-2">
                                     <Badge variant={STATUS_CONFIG[app.status as keyof typeof STATUS_CONFIG].variant} dot>
                                       {STATUS_CONFIG[app.status as keyof typeof STATUS_CONFIG].label}
@@ -316,20 +346,18 @@ export default function EmployerDashboard({ company, totalViews, totalApplicatio
                 <motion.div key={app.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                   className="p-1.5 rounded-2xl bg-black/[0.03] ring-1 ring-black/5">
                   <div className="rounded-[calc(1rem-0.375rem)] bg-white p-4 flex items-center justify-between gap-4 flex-wrap">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold bg-lavender-light text-lavender overflow-hidden">
+                    <Link href={`/dashboard/employer/applications/${app.id}`} className="flex items-center gap-3 min-w-0 group">
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold bg-lavender-light text-lavender overflow-hidden flex-shrink-0">
                         {app.user.avatarUrl
                           ? <img src={app.user.avatarUrl} alt="" className="w-full h-full object-cover" />
                           : app.user.name?.[0]?.toUpperCase()}
                       </div>
-                      <div>
-                        <p className="font-medium text-ink text-sm">{app.user.name}</p>
-                        <p className="text-xs text-muted">{app.jobTitle}</p>
+                      <div className="min-w-0">
+                        <p className="font-medium text-ink text-sm group-hover:text-sky-blue transition-colors truncate">{app.user.name}</p>
+                        <p className="text-xs text-muted truncate">{app.jobTitle}</p>
                       </div>
-                    </div>
+                    </Link>
                     <div className="flex items-center gap-3">
-                      <a href={`mailto:${app.user.email}`} className="text-xs text-sky-blue hover:underline">{app.user.email}</a>
-                      {app.user.phone && <span className="text-xs text-muted">{app.user.phone}</span>}
                       <Badge variant={STATUS_CONFIG[app.status as keyof typeof STATUS_CONFIG].variant} dot>
                         {STATUS_CONFIG[app.status as keyof typeof STATUS_CONFIG].label}
                       </Badge>
