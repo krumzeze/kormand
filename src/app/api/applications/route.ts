@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { jobId, coverNote } = parsed.data
+  const { jobId, coverNote, resumeUrl } = parsed.data
 
   // Check job exists
   const job = await prisma.job.findUnique({ where: { id: jobId } })
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     : null
 
   const application = await prisma.application.create({
-    data: { jobId, userId: session.user.id, coverNote, matchScore },
+    data: { jobId, userId: session.user.id, coverNote, resumeUrl: resumeUrl || null, matchScore },
     include: { job: { select: { title: true } } },
   })
 

@@ -30,6 +30,7 @@ export const jobSchema = z.object({
 export const applicationSchema = z.object({
   jobId: z.string().cuid(),
   coverNote: z.string().max(1000).optional(),
+  resumeUrl: z.string().startsWith('/api/uploads/').optional().or(z.literal('')),
 })
 
 export const candidateProfileSchema = z.object({

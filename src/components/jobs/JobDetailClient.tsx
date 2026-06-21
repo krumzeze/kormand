@@ -6,7 +6,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import {
   MapPin, Briefcase, Star, Eye, Clock, Zap, ArrowLeft,
-  Globe, Building2, Send, CheckCircle2, X
+  Globe, Building2, Send, CheckCircle2, X, Paperclip, FileText
 } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import JobCard from './JobCard'
@@ -52,10 +52,21 @@ export default function JobDetailClient({ job, similar, matchScore, alreadyAppli
   const locale = useLocale()
   const [applyOpen, setApplyOpen] = useState(false)
   const [coverNote, setCoverNote] = useState('')
+  const [resumeFile, setResumeFile] = useState<File | null>(null)
   const [applying, setApplying] = useState(false)
   const [applied, setApplied] = useState(alreadyApplied)
 
   const salary = formatSalary(job.salaryMin, job.salaryMax, job.currency)
+
+  const uploadResume = async (file: File): Promise<string | null> => {
+    const fd = new FormData()
+    fd.append('file', file)
+    fd.append('kind', 'document')
+    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.url as string
+  }
 
   const handleApply = async () => {
     if (!isLoggedIn) {
@@ -64,10 +75,20 @@ export default function JobDetailClient({ job, similar, matchScore, alreadyAppli
     }
     setApplying(true)
     try {
+      let resumeUrl = ''
+      if (resumeFile) {
+        const url = await uploadResume(resumeFile)
+        if (!url) {
+          toast('Не удалось загрузить резюме', 'error')
+          setApplying(false)
+          return
+        }
+        resumeUrl = url
+      }
       const res = await fetch('/api/applications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jobId: job.id, coverNote }),
+        body: JSON.stringify({ jobId: job.id, coverNote, resumeUrl }),
       })
       if (res.ok) {
         setApplied(true)
@@ -374,6 +395,34 @@ export default function JobDetailClient({ job, similar, matchScore, alreadyAppli
                   rows={5}
                   className="w-full rounded-2xl border border-black/10 bg-white/60 px-4 py-3 text-sm text-ink placeholder:text-muted outline-none transition-all duration-300 focus:border-sky-blue/50 focus:ring-2 focus:ring-sky-blue/20 resize-none"
                 />
+              </div>
+
+              <div className="mb-6">
+                <label className="text-sm font-medium text-ink/70 mb-2 block">Резюме <span className="text-muted font-normal">(PDF, JPG, PNG — необязательно)</span></label>
+                {resumeFile ? (
+                  <div className="flex items-center gap-3 rounded-2xl border border-black/10 bg-white/60 px-4 py-3">
+                    <FileText className="w-4 h-4 text-sky-blue flex-shrink-0" />
+                    <span className="text-sm text-ink truncate flex-1">{resumeFile.name}</span>
+                    <button type="button" onClick={() => setResumeFile(null)} className="text-muted hover:text-ink transition-colors">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex items-center gap-2.5 rounded-2xl border border-dashed border-black/15 bg-white/40 px-4 py-3 text-sm text-muted cursor-pointer hover:border-sky-blue/40 hover:text-ink transition-all">
+                    <Paperclip className="w-4 h-4" />
+                    Прикрепить файл
+                    <input
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                      className="hidden"
+                      onChange={e => {
+                        const f = e.target.files?.[0]
+                        if (f && f.size > 5 * 1024 * 1024) { toast('Файл больше 5 МБ', 'error'); return }
+                        setResumeFile(f ?? null)
+                      }}
+                    />
+                  </label>
+                )}
               </div>
 
               <div className="flex gap-3">
