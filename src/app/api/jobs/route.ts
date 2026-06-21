@@ -11,8 +11,8 @@ export async function GET(req: NextRequest) {
   const type = searchParams.get('type') || ''
   const level = searchParams.get('level') || ''
   const salaryMin = searchParams.get('salaryMin') ? Number(searchParams.get('salaryMin')) : undefined
-  const page = Number(searchParams.get('page') || '1')
-  const limit = Number(searchParams.get('limit') || '12')
+  const page = Math.max(1, Number(searchParams.get('page')) || 1)
+  const limit = Math.min(50, Math.max(1, Number(searchParams.get('limit')) || 12))
   const sort = searchParams.get('sort') || 'newest'
   const featured = searchParams.get('featured') === 'true'
 

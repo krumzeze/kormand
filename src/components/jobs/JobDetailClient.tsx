@@ -14,21 +14,7 @@ import ReportButton from '@/components/ReportButton'
 import VerifiedBadge from '@/components/VerifiedBadge'
 import { formatSalary, timeAgo } from '@/lib/utils'
 import { toast } from '@/components/ui/Toaster'
-
-function renderDescription(text: string) {
-  return text.split('\n').map((line, i) => (
-    <span key={i}>
-      {line.split(/(\*\*.*?\*\*)/g).map((part, j) =>
-        part.startsWith('**') && part.endsWith('**') ? (
-          <strong key={j}>{part.slice(2, -2)}</strong>
-        ) : (
-          part
-        )
-      )}
-      <br />
-    </span>
-  ))
-}
+import { renderDescription } from '@/lib/richText'
 
 const typeLabels: Record<string, string> = {
   FULL_TIME: 'Полная занятость', PART_TIME: 'Частичная', CONTRACT: 'Контракт',

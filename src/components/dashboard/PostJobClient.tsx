@@ -6,8 +6,9 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { Briefcase, Eye, Send, Building2, AlertCircle } from 'lucide-react'
 import Input from '@/components/ui/Input'
-import Textarea from '@/components/ui/Textarea'
+import RichTextEditor from '@/components/ui/RichTextEditor'
 import Select from '@/components/ui/Select'
+import { renderDescription } from '@/lib/richText'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import { CATEGORIES, CITIES } from '@/lib/utils'
@@ -193,10 +194,10 @@ export default function PostJobClient({ hasCompany, locale }: PostJobClientProps
                 error={errors.title}
               />
 
-              <Textarea
+              <RichTextEditor
                 label={t('description')}
                 value={description}
-                onChange={e => setDescription(e.target.value)}
+                onChange={setDescription}
                 placeholder={t('descriptionPlaceholder')}
                 rows={8}
                 error={errors.description}
@@ -288,7 +289,7 @@ export default function PostJobClient({ hasCompany, locale }: PostJobClientProps
               {city && <Badge variant="muted">{city}</Badge>}
             </div>
             {description && (
-              <div className="mt-6 text-sm text-muted leading-relaxed whitespace-pre-wrap">{description}</div>
+              <div className="mt-6 prose prose-sm max-w-none text-muted leading-relaxed">{renderDescription(description)}</div>
             )}
             {skills && (
               <div className="flex flex-wrap gap-2 mt-6">

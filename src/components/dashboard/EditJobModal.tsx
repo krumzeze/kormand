@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { X, Save } from 'lucide-react'
 import Input from '@/components/ui/Input'
-import Textarea from '@/components/ui/Textarea'
+import RichTextEditor from '@/components/ui/RichTextEditor'
 import Select from '@/components/ui/Select'
 import Button from '@/components/ui/Button'
 import { CATEGORIES, CITIES } from '@/lib/utils'
@@ -111,10 +111,10 @@ export default function EditJobModal({ job, onClose, onSaved }: EditJobModalProp
               error={errors.title}
             />
 
-            <Textarea
+            <RichTextEditor
               label="Описание"
               value={description}
-              onChange={e => setDescription(e.target.value)}
+              onChange={setDescription}
               rows={8}
               error={errors.description}
             />
