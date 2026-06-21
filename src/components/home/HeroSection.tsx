@@ -41,19 +41,19 @@ export default function HeroSection({ jobCount }: HeroSectionProps) {
       <motion.div
         className="blob w-96 h-96 -top-20 -right-20"
         style={{ background: '#C7B6FF' }}
-        animate={{ scale: [1, 1.1, 1], x: [0, 20, 0], y: [0, -10, 0] }}
+        animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
         transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
         className="blob w-72 h-72 bottom-10 left-10"
         style={{ background: '#7FB3FF' }}
-        animate={{ scale: [1, 1.15, 1], x: [0, -15, 0], y: [0, 15, 0] }}
+        animate={{ x: [0, -22, 0], y: [0, 22, 0] }}
         transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
       />
       <motion.div
         className="blob w-64 h-64 top-1/3 left-1/2"
         style={{ background: '#4FD1C5' }}
-        animate={{ scale: [1, 1.08, 1], rotate: [0, 10, 0] }}
+        animate={{ x: [0, 18, 0], y: [0, -14, 0] }}
         transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
       />
 
