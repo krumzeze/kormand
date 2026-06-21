@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Link } from '@/i18n/navigation'
 import { Star, Briefcase, ArrowUpRight } from 'lucide-react'
 import type { Company } from '@prisma/client'
+import VerifiedBadge from '@/components/VerifiedBadge'
 
 type CompanyWithCount = Company & { _count: { jobs: number } }
 
@@ -80,7 +81,10 @@ export default function FeaturedCompanies({ companies }: FeaturedCompaniesProps)
                       </div>
                     </div>
 
-                    <h3 className="font-heading font-semibold text-ink text-lg mt-4">{company.name}</h3>
+                    <h3 className="font-heading font-semibold text-ink text-lg mt-4 flex items-center gap-1.5">
+                      <span className="truncate">{company.name}</span>
+                      {company.isVerified && <VerifiedBadge />}
+                    </h3>
                     {company.industry && <p className="text-xs text-muted mt-1">{company.industry}</p>}
 
                     <div className="flex items-center gap-4 mt-4 pt-4 border-t border-black/5">
