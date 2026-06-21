@@ -15,6 +15,21 @@ import VerifiedBadge from '@/components/VerifiedBadge'
 import { formatSalary, timeAgo } from '@/lib/utils'
 import { toast } from '@/components/ui/Toaster'
 
+function renderDescription(text: string) {
+  return text.split('\n').map((line, i) => (
+    <span key={i}>
+      {line.split(/(\*\*.*?\*\*)/g).map((part, j) =>
+        part.startsWith('**') && part.endsWith('**') ? (
+          <strong key={j}>{part.slice(2, -2)}</strong>
+        ) : (
+          part
+        )
+      )}
+      <br />
+    </span>
+  ))
+}
+
 const typeLabels: Record<string, string> = {
   FULL_TIME: 'Полная занятость', PART_TIME: 'Частичная', CONTRACT: 'Контракт',
   INTERNSHIP: 'Стажировка', REMOTE: 'Удалённо',
@@ -171,14 +186,9 @@ export default function JobDetailClient({ job, similar, matchScore, alreadyAppli
           >
             <div className="rounded-[calc(1.5rem-0.375rem)] bg-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] p-8">
               <h2 className="font-heading font-semibold text-ink text-lg mb-5">{t('jobs.description')}</h2>
-              <div
-                className="prose prose-sm max-w-none text-muted leading-relaxed"
-                dangerouslySetInnerHTML={{
-                  __html: job.description
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\n/g, '<br />')
-                }}
-              />
+              <div className="prose prose-sm max-w-none text-muted leading-relaxed">
+                {renderDescription(job.description)}
+              </div>
 
               {/* Skills */}
               {job.skills.length > 0 && (
