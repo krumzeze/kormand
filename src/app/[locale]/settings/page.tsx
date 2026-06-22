@@ -12,7 +12,10 @@ export default async function SettingsPage({ params }: { params: { locale: strin
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, name: true, phone: true, avatarUrl: true },
+    select: {
+      id: true, name: true, phone: true, avatarUrl: true,
+      telegramUsername: true, telegramVerifiedAt: true, phoneVerifiedAt: true,
+    },
   })
 
   const isEmployer = session.user.role === 'EMPLOYER'

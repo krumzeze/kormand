@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import AccountForm from '@/components/settings/AccountForm'
 import CompanyProfileForm from '@/components/settings/CompanyProfileForm'
 import PasswordForm from '@/components/settings/PasswordForm'
+import TelegramVerify from '@/components/settings/TelegramVerify'
 
 interface SettingsClientProps {
   user: any
@@ -64,6 +65,9 @@ export default function SettingsClient({ user, company, isEmployer }: SettingsCl
             )}
             <Card title={t('account.title')}>
               <AccountForm user={user} />
+            </Card>
+            <Card title={t('telegram.title')}>
+              <TelegramVerify user={user} />
             </Card>
           </>
         )}
