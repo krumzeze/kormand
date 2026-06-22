@@ -210,20 +210,6 @@ export default function JobDetailClient({ job, similar, matchScore, alreadyAppli
               )}
             </div>
           </motion.div>
-
-          {/* Similar jobs */}
-          {similar.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              <h2 className="font-heading font-semibold text-ink text-lg mb-4">{t('jobs.similarJobs')}</h2>
-              <div className="grid gap-4">
-                {similar.map((j, i) => <JobCard key={j.id} job={j} index={i} compact />)}
-              </div>
-            </motion.div>
-          )}
         </div>
 
         {/* Sidebar */}
@@ -343,6 +329,21 @@ export default function JobDetailClient({ job, similar, matchScore, alreadyAppli
           </div>
         </div>
       </div>
+
+      {/* Similar jobs */}
+      {similar.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="mt-10"
+        >
+          <h2 className="font-heading font-semibold text-ink text-lg mb-4">{t('jobs.similarJobs')}</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {similar.map((j, i) => <JobCard key={j.id} job={j} index={i} compact />)}
+          </div>
+        </motion.div>
+      )}
 
       {/* Apply modal */}
       <AnimatePresence>
