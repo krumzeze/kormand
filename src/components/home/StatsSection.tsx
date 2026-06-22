@@ -40,13 +40,13 @@ export default function StatsSection({ jobCount, companyCount }: StatsSectionPro
   const jobs = useCountUp(jobCount, 1600, inView)
   const companies = useCountUp(companyCount, 1400, inView)
   const cities = useCountUp(6, 800, inView)
-  const salary = useCountUp(1800, 1800, inView)
+  const salary = useCountUp(3000, 1800, inView)
 
   const stats = [
     { icon: Briefcase, value: jobs, suffix: '+', label: t('jobs'), color: '#7FB3FF', bg: '#EEF5FF' },
     { icon: Building2, value: companies, suffix: '+', label: t('companies'), color: '#4FD1C5', bg: '#E6FAF8' },
     { icon: MapPin, value: cities, suffix: '', label: t('cities'), color: '#C7B6FF', bg: '#F3F0FF' },
-    { icon: TrendingUp, value: salary, suffix: '$', label: t('avgSalary'), color: '#FF9E80', bg: '#FFD3B620', prefix: '~' },
+    { icon: TrendingUp, value: salary, suffix: ' сом.', label: t('avgSalary'), color: '#FF9E80', bg: '#FFD3B620', prefix: '~' },
   ]
 
   return (
