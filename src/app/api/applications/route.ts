@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { applicationSchema } from '@/lib/validations'
 import { calcMatchScore } from '@/lib/utils'
+import { sendMessage } from '@/lib/telegram'
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -19,7 +20,10 @@ export async function POST(req: NextRequest) {
   const { jobId, coverNote, resumeUrl } = parsed.data
 
   // Check job exists
-  const job = await prisma.job.findUnique({ where: { id: jobId } })
+  const job = await prisma.job.findUnique({
+    where: { id: jobId },
+    include: { company: { select: { owner: { select: { telegramChatId: true, locale: true } } } } },
+  })
   if (!job || !job.isActive || job.isBlocked) {
     return NextResponse.json({ error: 'JOB_NOT_FOUND' }, { status: 404 })
   }
@@ -42,8 +46,23 @@ export async function POST(req: NextRequest) {
 
   const application = await prisma.application.create({
     data: { jobId, userId: session.user.id, coverNote, resumeUrl: resumeUrl || null, matchScore },
-    include: { job: { select: { title: true } } },
+    include: { job: { select: { title: true } }, user: { select: { name: true } } },
   })
+
+  // Уведомляем работодателя, если он подтвердил Telegram. Сбой отправки не
+  // должен ронять создание отклика.
+  const owner = job.company.owner
+  if (owner.telegramChatId) {
+    const loc = owner.locale === 'tj' ? 'tj' : 'ru'
+    const text = loc === 'tj'
+      ? `Дархости нав барои «${application.job.title}» аз ${application.user.name}`
+      : `Новый отклик на «${application.job.title}» от ${application.user.name}`
+    try {
+      await sendMessage(owner.telegramChatId, text)
+    } catch (e) {
+      console.error('telegram notify failed', e)
+    }
+  }
 
   return NextResponse.json(application, { status: 201 })
 }
