@@ -12,22 +12,29 @@ export async function PATCH(req: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
   const { name, phone, avatarUrl } = parsed.data
-  const newPhone = phone || null
 
-  // Ручная смена номера сбрасывает подтверждение — иначе непроверенный
-  // номер остался бы с phoneVerifiedAt (см. ADR 0008).
-  const current = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { phone: true },
-  })
+  // Телефоном заведует подтверждение через Telegram; здесь его трогаем только
+  // если поле реально пришло — тогда ручная смена сбрасывает подтверждение
+  // (см. ADR 0008).
+  let phoneData = {}
+  if (phone !== undefined) {
+    const newPhone = phone || null
+    const current = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { phone: true },
+    })
+    phoneData = {
+      phone: newPhone,
+      ...(newPhone !== current?.phone ? { phoneVerifiedAt: null } : {}),
+    }
+  }
 
   const user = await prisma.user.update({
     where: { id: session.user.id },
     data: {
       name,
-      phone: newPhone,
       avatarUrl: avatarUrl || null,
-      ...(newPhone !== current?.phone ? { phoneVerifiedAt: null } : {}),
+      ...phoneData,
     },
     select: { id: true, name: true, phone: true, avatarUrl: true },
   })

@@ -16,7 +16,6 @@ export default function AccountForm({ user }: AccountFormProps) {
   const { update } = useSession()
   const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatarUrl ?? null)
   const [name, setName] = useState(user?.name ?? '')
-  const [phone, setPhone] = useState(user?.phone ?? '')
   const [saving, setSaving] = useState(false)
 
   const submit = async (e: React.FormEvent) => {
@@ -30,7 +29,7 @@ export default function AccountForm({ user }: AccountFormProps) {
       const res = await fetch('/api/profile/account', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, avatarUrl: avatarUrl ?? '' }),
+        body: JSON.stringify({ name, avatarUrl: avatarUrl ?? '' }),
       })
       if (res.ok) {
         await update({ name, image: avatarUrl })
@@ -51,7 +50,6 @@ export default function AccountForm({ user }: AccountFormProps) {
       </div>
 
       <Input label={t('name')} value={name} onChange={e => setName(e.target.value)} required />
-      <Input label={t('phone')} type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+992 ..." />
 
       <button type="submit" disabled={saving} className="btn-gradient justify-center mt-1 w-fit">
         {t('submit')}
