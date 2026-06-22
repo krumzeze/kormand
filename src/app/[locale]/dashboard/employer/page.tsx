@@ -18,7 +18,7 @@ export default async function EmployerPage({ params }: { params: { locale: strin
           _count: { select: { applications: true } },
           applications: {
             include: {
-              user: { select: { id: true, name: true, email: true, phone: true, avatarUrl: true } },
+              user: { select: { id: true, name: true, email: true, phone: true, phoneVerifiedAt: true, avatarUrl: true } },
             },
             orderBy: { createdAt: 'desc' },
           },

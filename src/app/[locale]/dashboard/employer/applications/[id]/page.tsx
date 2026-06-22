@@ -2,7 +2,7 @@ import { auth } from '@/lib/auth'
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Link } from '@/i18n/navigation'
-import { ArrowLeft, Mail, Phone, FileText, MapPin, Briefcase, Star } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, Send, FileText, MapPin, Briefcase, Star } from 'lucide-react'
 import ApplicantStatusSelect from '@/components/dashboard/ApplicantStatusSelect'
 import { timeAgo } from '@/lib/utils'
 
@@ -23,6 +23,7 @@ export default async function ApplicantPage({ params }: { params: { locale: stri
       user: {
         select: {
           name: true, email: true, phone: true, avatarUrl: true,
+          phoneVerifiedAt: true, telegramUsername: true, telegramVerifiedAt: true,
           candidate: true,
         },
       },
@@ -70,9 +71,15 @@ export default async function ApplicantPage({ params }: { params: { locale: stri
                 <a href={`mailto:${app.user.email}`} className="flex items-center gap-2.5 text-sky-blue hover:underline">
                   <Mail className="w-4 h-4 flex-shrink-0" /> {app.user.email}
                 </a>
-                {app.user.phone && (
+                {app.user.phoneVerifiedAt && app.user.phone && (
                   <a href={`tel:${app.user.phone}`} className="flex items-center gap-2.5 text-ink hover:text-sky-blue transition-colors">
                     <Phone className="w-4 h-4 flex-shrink-0" /> {app.user.phone}
+                  </a>
+                )}
+                {app.user.telegramVerifiedAt && app.user.telegramUsername && (
+                  <a href={`https://t.me/${app.user.telegramUsername}`} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-2.5 text-ink hover:text-sky-blue transition-colors">
+                    <Send className="w-4 h-4 flex-shrink-0" /> @{app.user.telegramUsername}
                   </a>
                 )}
                 {profile?.city && (

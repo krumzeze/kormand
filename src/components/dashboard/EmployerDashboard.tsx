@@ -296,7 +296,7 @@ export default function EmployerDashboard({ company, totalViews, totalApplicatio
                                     </div>
                                     <div className="min-w-0">
                                       <p className="text-sm font-medium text-ink group-hover:text-sky-blue transition-colors truncate">{app.user.name}</p>
-                                      <p className="text-xs text-muted truncate">{app.user.email}{app.user.phone ? ` · ${app.user.phone}` : ''}</p>
+                                      <p className="text-xs text-muted truncate">{app.user.email}{app.user.phoneVerifiedAt && app.user.phone ? ` · ${app.user.phone}` : ''}</p>
                                     </div>
                                   </Link>
                                   <div className="flex items-center gap-2">
