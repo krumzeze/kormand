@@ -10,10 +10,7 @@ import {
 } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import JobCard from '@/components/jobs/JobCard'
-import Input from '@/components/ui/Input'
-import Button from '@/components/ui/Button'
 import { cn, timeAgo } from '@/lib/utils'
-import { toast } from '@/components/ui/Toaster'
 
 const STATUS_CONFIG = {
   SENT: { label: 'Отправлен', variant: 'muted' as const, icon: Clock, color: '#6B6F80' },
@@ -33,34 +30,10 @@ interface CandidateDashboardProps {
 export default function CandidateDashboard({ profile, applications, recommendations, user }: CandidateDashboardProps) {
   const t = useTranslations('dashboard.candidate')
   const [activeTab, setActiveTab] = useState<'applications' | 'profile' | 'recommendations'>('applications')
-  const [editMode, setEditMode] = useState(false)
-  const [saving, setSaving] = useState(false)
-
-  const [headline, setHeadline] = useState(profile?.headline || '')
-  const [about, setAbout] = useState(profile?.about || '')
-  const [city, setCity] = useState(profile?.city || '')
-  const [skills, setSkills] = useState(profile?.skills?.join(', ') || '')
 
   // Profile completion
   const fields = [profile?.headline, profile?.about, profile?.city, profile?.skills?.length, profile?.resumeUrl]
   const completion = Math.round((fields.filter(Boolean).length / fields.length) * 100)
-
-  const saveProfile = async () => {
-    setSaving(true)
-    try {
-      const res = await fetch('/api/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ headline, about, city, skills }),
-      })
-      if (res.ok) {
-        toast('Профиль сохранён!', 'success')
-        setEditMode(false)
-      }
-    } finally {
-      setSaving(false)
-    }
-  }
 
   const TABS = [
     { key: 'applications', label: t('applications'), icon: Briefcase, count: applications.length },
@@ -231,34 +204,16 @@ export default function CandidateDashboard({ profile, applications, recommendati
             <div className="rounded-[calc(1.5rem-0.375rem)] bg-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] p-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-heading font-semibold text-ink text-xl">{t('profile')}</h2>
-                <button
-                  onClick={() => setEditMode(!editMode)}
+                <Link
+                  href="/settings"
                   className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-muted hover:text-ink hover:bg-black/5 transition-all"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
-                  {editMode ? 'Отмена' : t('editProfile')}
-                </button>
+                  {t('editInSettings')}
+                </Link>
               </div>
 
-              {editMode ? (
-                <div className="flex flex-col gap-4">
-                  <Input label="Должность / Headline" value={headline} onChange={e => setHeadline(e.target.value)} placeholder="Frontend Developer, Data Scientist..." />
-                  <div>
-                    <label className="text-sm font-medium text-ink/70 mb-2 block">О себе</label>
-                    <textarea value={about} onChange={e => setAbout(e.target.value)} rows={4} placeholder="Расскажите о своём опыте и целях..."
-                      className="w-full rounded-2xl border border-black/10 px-4 py-3 text-sm outline-none focus:border-sky-blue/50 focus:ring-2 focus:ring-sky-blue/20 resize-none" />
-                  </div>
-                  <Input label="Город" value={city} onChange={e => setCity(e.target.value)} placeholder="Душанбе" />
-                  <Input label="Навыки (через запятую)" value={skills} onChange={e => setSkills(e.target.value)} placeholder="React, TypeScript, Node.js..." />
-                  <div className="flex gap-3 mt-2">
-                    <Button variant="gradient" onClick={saveProfile} loading={saving} className="flex-1">
-                      Сохранить
-                    </Button>
-                    <Button variant="secondary" onClick={() => setEditMode(false)}>Отмена</Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-5">
                   <div>
                     <p className="text-xs text-muted mb-1">Имя</p>
                     <p className="font-medium text-ink">{user.name}</p>
@@ -300,15 +255,11 @@ export default function CandidateDashboard({ profile, applications, recommendati
                     </div>
                   )}
 
-                  <button
-                    onClick={() => setEditMode(true)}
-                    className="btn-secondary text-sm w-fit"
-                  >
+                  <Link href="/settings" className="btn-secondary text-sm w-fit">
                     <Edit3 className="w-4 h-4" />
-                    {t('editProfile')}
-                  </button>
+                    {t('editInSettings')}
+                  </Link>
                 </div>
-              )}
             </div>
           </div>
 
@@ -336,9 +287,9 @@ export default function CandidateDashboard({ profile, applications, recommendati
               </div>
               <h3 className="font-heading font-semibold text-ink text-xl">Заполните профиль</h3>
               <p className="text-muted mt-2 max-w-sm">Добавьте навыки в профиль, чтобы мы подобрали подходящие вакансии</p>
-              <button onClick={() => setActiveTab('profile')} className="btn-gradient mt-8">
+              <Link href="/settings" className="btn-gradient mt-8">
                 Заполнить профиль
-              </button>
+              </Link>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

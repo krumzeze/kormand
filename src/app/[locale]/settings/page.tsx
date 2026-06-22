@@ -19,14 +19,18 @@ export default async function SettingsPage({ params }: { params: { locale: strin
   })
 
   const isEmployer = session.user.role === 'EMPLOYER'
+  const isCandidate = session.user.role === 'CANDIDATE'
   const company = isEmployer
     ? await prisma.company.findUnique({ where: { ownerId: session.user.id } })
+    : null
+  const profile = isCandidate
+    ? await prisma.candidateProfile.findUnique({ where: { userId: session.user.id } })
     : null
 
   return (
     <div className="pt-28 pb-24 max-w-4xl mx-auto px-4 md:px-8">
       <h1 className="font-heading font-bold text-ink text-2xl mb-8">{t('title')}</h1>
-      <SettingsClient user={user} company={company} isEmployer={isEmployer} />
+      <SettingsClient user={user} company={company} profile={profile} isEmployer={isEmployer} isCandidate={isCandidate} />
     </div>
   )
 }

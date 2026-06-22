@@ -6,13 +6,16 @@ import { User, Shield, Building2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import AccountForm from '@/components/settings/AccountForm'
 import CompanyProfileForm from '@/components/settings/CompanyProfileForm'
+import CandidateProfileForm from '@/components/settings/CandidateProfileForm'
 import PasswordForm from '@/components/settings/PasswordForm'
 import TelegramVerify from '@/components/settings/TelegramVerify'
 
 interface SettingsClientProps {
   user: any
   company: any
+  profile: any
   isEmployer: boolean
+  isCandidate: boolean
 }
 
 type Tab = 'profile' | 'security'
@@ -28,7 +31,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   )
 }
 
-export default function SettingsClient({ user, company, isEmployer }: SettingsClientProps) {
+export default function SettingsClient({ user, company, profile, isEmployer, isCandidate }: SettingsClientProps) {
   const t = useTranslations('settings')
   const [tab, setTab] = useState<Tab>('profile')
 
@@ -61,6 +64,11 @@ export default function SettingsClient({ user, company, isEmployer }: SettingsCl
             {isEmployer && (
               <Card title={t('company.title')}>
                 <CompanyProfileForm company={company} />
+              </Card>
+            )}
+            {isCandidate && (
+              <Card title={t('candidate.title')}>
+                <CandidateProfileForm profile={profile} />
               </Card>
             )}
             <Card title={t('account.title')}>

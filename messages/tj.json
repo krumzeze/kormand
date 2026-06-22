@@ -137,6 +137,7 @@
       "recommendations": "Тавсияҳо",
       "profileCompletion": "Пурракунии профил",
       "editProfile": "Таҳрири профил",
+      "editInSettings": "Дар танзимот таҳрир кардан",
       "uploadResume": "Боргирии резюме",
       "noApplications": "Ҳоло аризаи шумо нест",
       "noApplicationsHint": "Ҷойи кори ҷолибро ёбед ва ариза диҳед!"
@@ -239,6 +240,26 @@
     "tabs": {
       "profile": "Профил",
       "security": "Амният"
+    },
+    "candidate": {
+      "title": "Профили коҷӯй",
+      "headline": "Вазифа / Headline",
+      "headlinePlaceholder": "Frontend-барномасоз, муҳосиб, дизайнер...",
+      "about": "Дар бораи худ",
+      "aboutPlaceholder": "Дар бораи таҷриба, ҷиҳатҳои қавӣ ва ҳадафҳои худ нақл кунед...",
+      "city": "Шаҳр",
+      "cityPlaceholder": "Душанбе",
+      "experience": "Сатҳи таҷриба",
+      "experiencePlaceholder": "Сатҳро интихоб кунед",
+      "skills": "Малакаҳо",
+      "skillsPlaceholder": "React, TypeScript, Node.js...",
+      "skillsHint": "Якчанд малака бо вергул ҷудо кунед",
+      "viewHint": "Ин профилро корфармоён пас аз аризаи шумо мебинанд",
+      "submit": "Профилро нигоҳ доштан",
+      "success": "Профил нигоҳ дошта шуд",
+      "errors": {
+        "generic": "Нигоҳ дошта нашуд"
+      }
     },
     "account": {
       "title": "Маълумоти шахсӣ",

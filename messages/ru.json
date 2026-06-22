@@ -137,6 +137,7 @@
       "recommendations": "Рекомендации",
       "profileCompletion": "Заполненность профиля",
       "editProfile": "Редактировать профиль",
+      "editInSettings": "Редактировать в настройках",
       "uploadResume": "Загрузить резюме",
       "noApplications": "У вас пока нет откликов",
       "noApplicationsHint": "Найдите интересную вакансию и откликнитесь!"
@@ -239,6 +240,26 @@
     "tabs": {
       "profile": "Профиль",
       "security": "Безопасность"
+    },
+    "candidate": {
+      "title": "Профиль соискателя",
+      "headline": "Должность / Headline",
+      "headlinePlaceholder": "Frontend-разработчик, бухгалтер, дизайнер...",
+      "about": "О себе",
+      "aboutPlaceholder": "Расскажите о своём опыте, сильных сторонах и целях...",
+      "city": "Город",
+      "cityPlaceholder": "Душанбе",
+      "experience": "Уровень опыта",
+      "experiencePlaceholder": "Выберите уровень",
+      "skills": "Навыки",
+      "skillsPlaceholder": "React, TypeScript, Node.js...",
+      "skillsHint": "Несколько навыков через запятую",
+      "viewHint": "Этот профиль видят работодатели после вашего отклика",
+      "submit": "Сохранить профиль",
+      "success": "Профиль сохранён",
+      "errors": {
+        "generic": "Не удалось сохранить"
+      }
     },
     "account": {
       "title": "Личные данные",
