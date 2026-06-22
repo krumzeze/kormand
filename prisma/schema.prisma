@@ -64,6 +64,8 @@ model User {
   phone        String?
   avatarUrl    String?
   locale       String   @default("ru")
+  // Момент принятия Условий и Политики при регистрации — для доказуемости согласия
+  consentAcceptedAt DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

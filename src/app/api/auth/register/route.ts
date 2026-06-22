@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
         passwordHash,
         role,
         phone,
+        consentAcceptedAt: new Date(),
         ...(role === 'CANDIDATE' && {
           candidate: { create: {} },
         }),
