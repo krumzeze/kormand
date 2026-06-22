@@ -7,6 +7,7 @@ export const registerSchema = z.object({
   password: z.string().min(8, 'Минимум 8 символов'),
   role: z.enum([Role.CANDIDATE, Role.EMPLOYER]),
   phone: z.string().optional(),
+  acceptedTerms: z.literal(true),
 })
 
 export const loginSchema = z.object({

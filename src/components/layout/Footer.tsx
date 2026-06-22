@@ -62,8 +62,8 @@ export default function Footer() {
           <div>
             <h4 className="text-sm font-semibold text-ink mb-4">{t('legal')}</h4>
             <ul className="flex flex-col gap-3">
-              <li><Link href="#" className="text-sm text-muted hover:text-ink transition-colors">{t('privacy')}</Link></li>
-              <li><Link href="#" className="text-sm text-muted hover:text-ink transition-colors">{t('terms')}</Link></li>
+              <li><Link href="/privacy" className="text-sm text-muted hover:text-ink transition-colors">{t('privacy')}</Link></li>
+              <li><Link href="/terms" className="text-sm text-muted hover:text-ink transition-colors">{t('terms')}</Link></li>
             </ul>
           </div>
         </div>

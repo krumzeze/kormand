@@ -21,18 +21,23 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [phone, setPhone] = useState('')
+  const [accepted, setAccepted] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    if (!accepted) {
+      setError(t('consentError'))
+      return
+    }
     setLoading(true)
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, role, phone }),
+        body: JSON.stringify({ name, email, password, role, phone, acceptedTerms: accepted }),
       })
       const data = await res.json()
 
@@ -117,13 +122,32 @@ export default function RegisterPage() {
               <Input label={t('password')} type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Минимум 8 символов" required icon={<Lock className="w-4 h-4" />} />
               <Input label={t('phone')} type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+992..." icon={<Phone className="w-4 h-4" />} />
 
+              <label className="flex items-start gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={accepted}
+                  onChange={e => setAccepted(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-ink/20 text-sky-blue focus:ring-sky-blue/40"
+                />
+                <span className="text-xs text-muted leading-relaxed">
+                  {t.rich('consent', {
+                    terms: chunks => (
+                      <Link href="/terms" target="_blank" onClick={e => e.stopPropagation()} className="text-sky-blue hover:underline">{chunks}</Link>
+                    ),
+                    privacy: chunks => (
+                      <Link href="/privacy" target="_blank" onClick={e => e.stopPropagation()} className="text-sky-blue hover:underline">{chunks}</Link>
+                    ),
+                  })}
+                </span>
+              </label>
+
               {error && (
                 <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-red-500 bg-red-50 rounded-xl px-4 py-3">
                   {error}
                 </motion.p>
               )}
 
-              <Button type="submit" variant="gradient" size="lg" loading={loading} className="w-full mt-2">
+              <Button type="submit" variant="gradient" size="lg" loading={loading} disabled={!accepted} className="w-full mt-2">
                 {t('register')}
                 <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center ml-auto">
                   <ArrowRight className="w-3.5 h-3.5" />
