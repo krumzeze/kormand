@@ -97,6 +97,9 @@ export default async function ApplicantPage({ params }: { params: { locale: stri
                     <Star className="w-4 h-4 flex-shrink-0 text-coral" /> Совпадение {app.matchScore}%
                   </p>
                 )}
+                {!app.user.phoneVerifiedAt && !app.user.telegramVerifiedAt && (
+                  <p className="text-xs text-muted/80 pt-1">Кандидат не подтвердил телефон и Telegram</p>
+                )}
               </div>
             </div>
           </div>
