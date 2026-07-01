@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   const sort = searchParams.get('sort') || 'newest'
   const featured = searchParams.get('featured') === 'true'
 
-  const where: any = { isActive: true, isBlocked: false }
+  const where: any = { isActive: true, isBlocked: false, source: null }
 
   if (q) {
     where.OR = [

@@ -12,6 +12,7 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
+    "sync:somon": "tsx prisma/sync-somon.ts",
     "test": "vitest run"
   },
   "dependencies": {

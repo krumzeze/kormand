@@ -56,6 +56,25 @@ services:
     volumes:
       - uploads:/app/public/uploads
 
+  # Экспериментальный импорт вакансий с somon.tj раз в сутки. Запускает синк
+  # сразу при старте, затем каждые 24 часа. Изолирован: пишет только вакансии
+  # с source='somon', в основную выдачу они не попадают.
+  sync-somon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://kormand:kormand_pass@postgres:5432/kormand_db
+    entrypoint:
+      - sh
+      - -c
+      - 'while true; do echo "[sync-somon] $(date -u)"; npx tsx prisma/sync-somon.ts || true; sleep 86400; done'
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   uploads:
