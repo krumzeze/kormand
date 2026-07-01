@@ -42,6 +42,7 @@ interface AdDetails {
   description: string
   salaryMin: number | null
   salaryMax: number | null
+  currency: Currency
 }
 
 async function fetchHtml(url: string): Promise<string | null> {
@@ -95,37 +96,33 @@ function parseListing(html: string): AdStub[] {
   return out
 }
 
-function parseSalary(html: string): { min: number | null; max: number | null } {
-  const text = stripTags(html)
-  // "1500 - 3000 c." или "2000 c."
-  const range = text.match(/(\d[\d\s]{2,})\s*[-–]\s*(\d[\d\s]{2,})\s*с\.?/i)
-  if (range) return { min: toInt(range[1]), max: toInt(range[2]) }
-  const single = text.match(/(\d[\d\s]{2,})\s*с\.?/i)
-  if (single) { const v = toInt(single[1]); return { min: v, max: v } }
-  return { min: null, max: null }
-}
-
-function toInt(s: string): number {
-  return parseInt(s.replace(/\s/g, ''), 10)
+// somon отдаёт цену микроразметкой schema.org. "Договорная" = content="0.00".
+function parsePrice(html: string): { salaryMin: number | null; salaryMax: number | null; currency: Currency } {
+  const cur = html.match(/itemprop="priceCurrency"\s+content="([^"]+)"/i)?.[1]
+  const currency = cur === 'USD' ? Currency.USD : Currency.TJS
+  const raw = html.match(/itemprop="price"\s+content="([^"]+)"/i)?.[1]
+  const val = raw ? Math.round(parseFloat(raw)) : 0
+  if (!val || Number.isNaN(val)) return { salaryMin: null, salaryMax: null, currency }
+  return { salaryMin: val, salaryMax: val, currency }
 }
 
 function parseDetails(html: string, fallbackTitle: string): AdDetails {
-  const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)
+  const h1 = html.match(/<h1[^>]*itemprop="name"[^>]*>([\s\S]*?)<\/h1>/i) || html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)
   const title = h1 ? stripTags(h1[1]) : fallbackTitle
 
-  // Хлебные крошки: "Вакансии » <категория>"
-  const crumb = html.match(/Вакансии\s*»\s*([^<»]+)</i)
-  const category = crumb ? stripTags(crumb[1]) : 'Прочее'
+  const catM = html.match(/data-category="([^"]+)"/i)
+  const category = catM ? decodeEntities(catM[1]).trim() : 'Прочее'
 
-  // Город somon отдаёт в блоке параметров; берём известные города по словарю.
-  const CITIES = ['Душанбе', 'Худжанд', 'Бохтар', 'Куляб', 'Истаравшан', 'Турсунзаде', 'Хорог', 'Пенджикент', 'Вахдат', 'Гиссар']
-  const city = CITIES.find(c => html.includes(c)) || 'Не указан'
+  // Город есть в <title>: "… №16612655 в г. Душанбе - <категория> - Somon.tj".
+  const titleTag = html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || ''
+  const cityM = titleTag.match(/в\s+г\.?\s*([А-ЯЁ][А-Яа-яёЁ-]+)/)
+  const city = cityM ? cityM[1].trim() : 'Не указан'
 
-  const body = html.match(/<div[^>]*class="[^"]*(?:description|adv-text|ad-text)[^"]*"[^>]*>([\s\S]*?)<\/div>/i)
+  const body = html.match(/itemprop="description"[^>]*>([\s\S]*?)<\/div>/i)
   const description = stripPhones(body ? stripTags(body[1]) : '')
 
-  const { min, max } = parseSalary(html)
-  return { title, city, category, description, salaryMin: min, salaryMax: max }
+  const { salaryMin, salaryMax, currency } = parsePrice(html)
+  return { title, city, category, description, salaryMin, salaryMax, currency }
 }
 
 async function ensureStubCompany(): Promise<string> {
@@ -220,7 +217,7 @@ async function main() {
         level: ExperienceLevel.JUNIOR,
         salaryMin: d?.salaryMin ?? null,
         salaryMax: d?.salaryMax ?? null,
-        currency: Currency.TJS,
+        currency: d?.currency ?? Currency.TJS,
         skills: [],
         category: d?.category || 'Прочее',
         source: SOURCE,
