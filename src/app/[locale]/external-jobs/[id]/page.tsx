@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { auth } from '@/lib/auth'
 import { Link } from '@/i18n/navigation'
 import { formatSalary, timeAgo } from '@/lib/utils'
 import { MapPin, Clock, Eye, ExternalLink, ArrowLeft } from 'lucide-react'
@@ -18,6 +19,10 @@ const typeLabels: Record<string, string> = {
 }
 
 export default async function ExternalJobDetailPage({ params }: Props) {
+  // Доступ к импорту somon.tj временно только у владельца (см. правила somon).
+  const session = await auth()
+  if (!session?.user.isRoot) notFound()
+
   const job = await prisma.job.findFirst({
     where: { id: params.id, source: 'somon', isActive: true, isBlocked: false },
   })

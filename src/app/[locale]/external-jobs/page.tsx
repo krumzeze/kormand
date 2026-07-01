@@ -1,4 +1,6 @@
+import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { auth } from '@/lib/auth'
 import ExternalJobCard from '@/components/jobs/ExternalJobCard'
 
 export const dynamic = 'force-dynamic'
@@ -12,6 +14,10 @@ async function getExternalJobs() {
 }
 
 export default async function ExternalJobsPage() {
+  // Витрина импорта somon.tj временно доступна только владельцу (см. правила somon).
+  const session = await auth()
+  if (!session?.user.isRoot) notFound()
+
   const jobs = await getExternalJobs()
 
   return (

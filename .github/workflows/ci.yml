@@ -138,5 +138,5 @@ jobs:
             git reset --hard origin/main
             docker compose build
             docker compose run --rm migrate
-            docker compose up -d
+            docker compose up -d --remove-orphans
             docker image prune -f
