@@ -128,6 +128,9 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
+          # Полная пересборка Docker + next build на VPS не укладывается в
+          # дефолтные 10m — иначе SSH-шаг рубит деплой на середине.
+          command_timeout: 30m
           script: |
             set -e
             cd /root/kormand
