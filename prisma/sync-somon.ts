@@ -5,6 +5,10 @@
  * выдачу не попадают (фильтр source:null), показываются на /external-jobs со
  * ссылкой на оригинал. Запуск раз в день (см. docker-compose, сервис sync-somon).
  *
+ * Все поля берём прямо из карточек листинга (заголовок, описание, город,
+ * категория, цена) — детальные страницы не запрашиваем, поэтому полный обход
+ * ~130 страниц стоит ~130 запросов, а не тысячи.
+ *
  * Логика пропаж по счётчику непопаданий:
  *   - вакансия есть в источнике  → missCount=0, isActive=true, lastSeenAt=now
  *   - вакансии нет в источнике    → missCount++
@@ -21,28 +25,22 @@ const prisma = new PrismaClient()
 const SOURCE = 'somon'
 const BASE = 'https://somon.tj/vakansii/'
 const MISS_LIMIT = 3            // проходов подряд без вакансии до удаления
-const MAX_PAGES = 20           // предохранитель от бесконечного обхода
-const MIN_EXPECTED = 15        // меньше — считаем сбор битым, ничего не гасим
-const PAGE_DELAY_MS = 1500     // вежливая пауза между запросами
-const AD_DELAY_MS = 1200
+const MAX_PAGES = 200           // предохранитель; реально обход прервётся раньше
+const MIN_EXPECTED = 100        // меньше — считаем сбор битым, ничего не гасим
+const PAGE_DELAY_MS = 1200      // вежливая пауза между страницами
 const UA = 'Mozilla/5.0 (compatible; kormand-import/0.1; +https://kormand.tj)'
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
-interface AdStub {
+interface AdRecord {
   sourceId: string
   sourceUrl: string
-  title: string
-}
-
-interface AdDetails {
   title: string
   city: string
   category: string
   description: string
   salaryMin: number | null
   salaryMax: number | null
-  currency: Currency
 }
 
 async function fetchHtml(url: string): Promise<string | null> {
@@ -78,51 +76,74 @@ function stripPhones(text: string): string {
     .trim()
 }
 
-// Со страницы листинга берём только якорь: id, url, заголовок. Класс-обёртка
-// у somon меняется, поэтому цепляемся за стабильный формат ссылки /adv/ID_slug/.
-function parseListing(html: string): AdStub[] {
-  const out: AdStub[] = []
-  const seen = new Set<string>()
-  const re = /<a[^>]+href="(\/adv\/(\d+)_[^"]*)"[^>]*>([\s\S]*?)<\/a>/g
+function firstMatch(slice: string, re: RegExp): string | null {
+  const m = slice.match(re)
+  return m ? m[1] : null
+}
+
+function parseCardSalary(slice: string): { min: number | null; max: number | null } {
+  const raw = firstMatch(slice, /announcement-block__price[^>]*>([\s\S]*?)<\/div>/i)
+  if (!raw) return { min: null, max: null }
+  const text = stripTags(raw)
+  if (/договорн/i.test(text)) return { min: null, max: null }
+  const nums = (text.match(/\d[\d\s]*\d|\d/g) || []).map(n => parseInt(n.replace(/\s/g, ''), 10))
+  if (nums.length === 0) return { min: null, max: null }
+  if (nums.length === 1) return { min: nums[0], max: nums[0] }
+  return { min: nums[0], max: nums[1] }
+}
+
+// Разбираем страницу листинга на карточки: якорь-заголовок и всё, что до
+// следующего такого якоря. Классы announcement-block__* стабильны для VIP и
+// обычных объявлений.
+function parseCards(html: string): AdRecord[] {
+  const anchorRe = /<a[^>]*class="announcement-block__title[^"]*"[^>]*href="(\/adv\/(\d+)_[^"]*)"[^>]*>([\s\S]*?)<\/a>/g
+  const anchors: { id: string; url: string; title: string; at: number; end: number }[] = []
   let m: RegExpExecArray | null
-  while ((m = re.exec(html))) {
-    const [, path, id, inner] = m
-    if (seen.has(id)) continue
-    const title = stripTags(inner)
-    if (!title) continue
-    seen.add(id)
-    out.push({ sourceId: id, sourceUrl: new URL(path, BASE).toString(), title })
+  while ((m = anchorRe.exec(html))) {
+    anchors.push({
+      url: new URL(m[1], BASE).toString(),
+      id: m[2],
+      title: stripTags(m[3]),
+      at: m.index,
+      end: anchorRe.lastIndex,
+    })
+  }
+
+  const out: AdRecord[] = []
+  const seen = new Set<string>()
+  for (let i = 0; i < anchors.length; i++) {
+    const a = anchors[i]
+    if (seen.has(a.id) || !a.title) continue
+    seen.add(a.id)
+    const slice = html.slice(a.end, anchors[i + 1]?.at ?? a.end + 2000)
+
+    const descRaw = firstMatch(slice, /announcement-block__description[^>]*>([\s\S]*?)<\/div>/i)
+    const description = stripPhones(descRaw ? stripTags(descRaw) : '')
+
+    // Блок даты: "<Компания>, Сегодня 22:02, <Город>" — город после последней запятой.
+    const dateRaw = firstMatch(slice, /announcement-block__date[^>]*>([\s\S]*?)<\/div>/i)
+    const dateParts = dateRaw ? stripTags(dateRaw).split(',').map(s => s.trim()).filter(Boolean) : []
+    const city = dateParts.length ? dateParts[dateParts.length - 1] : 'Не указан'
+
+    // Хлебные крошки: "Вакансии » <категория>" — берём последний <span>.
+    const crumbsRaw = firstMatch(slice, /announcement-block__breadcrumbs[^>]*>([\s\S]*?)<\/div>/i)
+    const crumbSpans = crumbsRaw ? [...crumbsRaw.matchAll(/<span[^>]*>([^<]+)<\/span>/g)].map(x => x[1].trim()) : []
+    const category = crumbSpans.length ? crumbSpans[crumbSpans.length - 1] : 'Прочее'
+
+    const { min, max } = parseCardSalary(slice)
+
+    out.push({
+      sourceId: a.id,
+      sourceUrl: a.url,
+      title: a.title.slice(0, 200),
+      city: city || 'Не указан',
+      category: category || 'Прочее',
+      description,
+      salaryMin: min,
+      salaryMax: max,
+    })
   }
   return out
-}
-
-// somon отдаёт цену микроразметкой schema.org. "Договорная" = content="0.00".
-function parsePrice(html: string): { salaryMin: number | null; salaryMax: number | null; currency: Currency } {
-  const cur = html.match(/itemprop="priceCurrency"\s+content="([^"]+)"/i)?.[1]
-  const currency = cur === 'USD' ? Currency.USD : Currency.TJS
-  const raw = html.match(/itemprop="price"\s+content="([^"]+)"/i)?.[1]
-  const val = raw ? Math.round(parseFloat(raw)) : 0
-  if (!val || Number.isNaN(val)) return { salaryMin: null, salaryMax: null, currency }
-  return { salaryMin: val, salaryMax: val, currency }
-}
-
-function parseDetails(html: string, fallbackTitle: string): AdDetails {
-  const h1 = html.match(/<h1[^>]*itemprop="name"[^>]*>([\s\S]*?)<\/h1>/i) || html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)
-  const title = h1 ? stripTags(h1[1]) : fallbackTitle
-
-  const catM = html.match(/data-category="([^"]+)"/i)
-  const category = catM ? decodeEntities(catM[1]).trim() : 'Прочее'
-
-  // Город есть в <title>: "… №16612655 в г. Душанбе - <категория> - Somon.tj".
-  const titleTag = html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || ''
-  const cityM = titleTag.match(/в\s+г\.?\s*([А-ЯЁ][А-Яа-яёЁ-]+)/)
-  const city = cityM ? cityM[1].trim() : 'Не указан'
-
-  const body = html.match(/itemprop="description"[^>]*>([\s\S]*?)<\/div>/i)
-  const description = stripPhones(body ? stripTags(body[1]) : '')
-
-  const { salaryMin, salaryMax, currency } = parsePrice(html)
-  return { title, city, category, description, salaryMin, salaryMax, currency }
 }
 
 async function ensureStubCompany(): Promise<string> {
@@ -152,17 +173,17 @@ async function ensureStubCompany(): Promise<string> {
   return company.id
 }
 
-async function collectStubs(): Promise<AdStub[]> {
-  const all = new Map<string, AdStub>()
+async function collectAll(): Promise<AdRecord[]> {
+  const all = new Map<string, AdRecord>()
   for (let page = 1; page <= MAX_PAGES; page++) {
     const url = page === 1 ? BASE : `${BASE}?page=${page}`
     const html = await fetchHtml(url)
     if (!html) break
-    const stubs = parseListing(html)
-    if (stubs.length === 0) break            // дальше пусто — конец списка
+    const cards = parseCards(html)
+    if (cards.length === 0) break            // пустая страница — конец списка
     let added = 0
-    for (const s of stubs) if (!all.has(s.sourceId)) { all.set(s.sourceId, s); added++ }
-    console.log(`  стр.${page}: ${stubs.length} объявл., новых ${added}`)
+    for (const c of cards) if (!all.has(c.sourceId)) { all.set(c.sourceId, c); added++ }
+    if (page % 10 === 0 || page === 1) console.log(`  стр.${page}: +${added} (всего ${all.size})`)
     if (added === 0) break                    // страница-дубликат — конец пагинации
     await sleep(PAGE_DELAY_MS)
   }
@@ -173,67 +194,56 @@ async function main() {
   console.log('🔄 Синхронизация вакансий с somon.tj…')
   const companyId = await ensureStubCompany()
 
-  const stubs = await collectStubs()
-  console.log(`Собрано ${stubs.length} объявлений.`)
+  const ads = await collectAll()
+  console.log(`Собрано ${ads.length} объявлений.`)
 
   // Guard: подозрительно мало — источник, вероятно, недоступен/забанил. Не трогаем каталог.
-  if (stubs.length < MIN_EXPECTED) {
+  if (ads.length < MIN_EXPECTED) {
     console.error(`⛔ Собрано меньше ${MIN_EXPECTED} — считаю сбор битым, ничего не меняю.`)
     process.exit(1)
   }
 
-  const seenIds = new Set(stubs.map(s => s.sourceId))
+  const seenIds = new Set(ads.map(a => a.sourceId))
 
-  // Какие из собранных ещё не в базе — только для них тянем детальную страницу.
-  const existing = await prisma.job.findMany({
-    where: { source: SOURCE },
-    select: { sourceId: true },
-  })
+  const existing = await prisma.job.findMany({ where: { source: SOURCE }, select: { sourceId: true } })
   const existingIds = new Set(existing.map(j => j.sourceId))
 
   let created = 0
-  let refreshed = 0
-  for (const stub of stubs) {
-    if (existingIds.has(stub.sourceId)) {
-      // Уже есть — просто отмечаем живой, деталь не перезапрашиваем.
-      await prisma.job.update({
-        where: { source_sourceId: { source: SOURCE, sourceId: stub.sourceId } },
-        data: { isActive: true, missCount: 0, lastSeenAt: new Date() },
-      })
-      refreshed++
-      continue
+  let updated = 0
+  for (const ad of ads) {
+    const data = {
+      title: ad.title,
+      description: ad.description || ad.title,
+      city: ad.city,
+      category: ad.category,
+      salaryMin: ad.salaryMin,
+      salaryMax: ad.salaryMax,
     }
-    // Новое объявление — тянем деталь.
-    const html = await fetchHtml(stub.sourceUrl)
-    await sleep(AD_DELAY_MS)
-    const d = html ? parseDetails(html, stub.title) : null
-    await prisma.job.create({
-      data: {
+    await prisma.job.upsert({
+      where: { source_sourceId: { source: SOURCE, sourceId: ad.sourceId } },
+      update: { ...data, isActive: true, missCount: 0, lastSeenAt: new Date() },
+      create: {
+        ...data,
         companyId,
-        title: (d?.title || stub.title).slice(0, 200),
-        description: d?.description || stub.title,
-        city: d?.city || 'Не указан',
         type: JobType.FULL_TIME,
         level: ExperienceLevel.JUNIOR,
-        salaryMin: d?.salaryMin ?? null,
-        salaryMax: d?.salaryMax ?? null,
-        currency: d?.currency ?? Currency.TJS,
+        currency: Currency.TJS,
         skills: [],
-        category: d?.category || 'Прочее',
         source: SOURCE,
-        sourceId: stub.sourceId,
-        sourceUrl: stub.sourceUrl,
+        sourceId: ad.sourceId,
+        sourceUrl: ad.sourceUrl,
         lastSeenAt: new Date(),
         missCount: 0,
       },
     })
-    created++
+    if (existingIds.has(ad.sourceId)) updated++
+    else created++
   }
 
   // Пропавшие: source=somon, которых не было в этом проходе.
   const gone = await prisma.job.findMany({
     where: { source: SOURCE, sourceId: { notIn: [...seenIds] } },
-    select: { id: true, sourceId: true, missCount: true },
+    select: { id: true, missCount: true },
   })
 
   let deactivated = 0
@@ -244,19 +254,16 @@ async function main() {
       await prisma.job.delete({ where: { id: job.id } })
       deleted++
     } else {
-      await prisma.job.update({
-        where: { id: job.id },
-        data: { isActive: false, missCount: next },
-      })
+      await prisma.job.update({ where: { id: job.id }, data: { isActive: false, missCount: next } })
       deactivated++
     }
   }
 
   console.log('✅ Готово.')
-  console.log(`  создано:      ${created}`)
-  console.log(`  подтверждено: ${refreshed}`)
-  console.log(`  погашено:     ${deactivated}`)
-  console.log(`  удалено:      ${deleted}`)
+  console.log(`  создано:   ${created}`)
+  console.log(`  обновлено: ${updated}`)
+  console.log(`  погашено:  ${deactivated}`)
+  console.log(`  удалено:   ${deleted}`)
 }
 
 main()
