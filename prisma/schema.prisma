@@ -155,12 +155,23 @@ model Job {
   isBlocked   Boolean         @default(false)
   blockReason String?
   views       Int             @default(0)
+
+  // Импорт из внешних источников (напр. somon.tj). У «наших» вакансий source = null.
+  // missCount — сколько проходов синка подряд вакансии не было в источнике;
+  // при достижении порога запись физически удаляется.
+  source      String?
+  sourceId    String?
+  sourceUrl   String?
+  lastSeenAt  DateTime?
+  missCount   Int             @default(0)
+
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
   applications Application[]
   reports      Report[]
 
+  @@unique([source, sourceId])
   @@index([city, category, type])
   @@index([isActive, isFeatured])
   @@map("jobs")
